@@ -57,21 +57,22 @@ Public template for building a coffee shop on Zalo Mini App. Main features:
 
 ## Deployment
 
-1. Create a mini app. For instruction on how to create a mini app, please refer to [Coffee Shop Tutorial](https://mini.zalo.me/tutorial/coffee-shop)
+1. **Create a Mini App**: Refer to the [Coffee Shop Tutorial](https://mini.zalo.me/tutorial/coffee-shop) for instructions.
 
-1. Setup payment methods if you want to accept online payments
+2. **Setup Payment**: Configure payment methods if you want to accept online payments.
    ![](./docs/payment.png "Payment method")
 
-1. Deploy your mini app to Zalo using the mini app ID created in step 1.
+3. **Deploy**:
+   - **Using Zalo Mini App Extension**: This is the recommended way to deploy your app directly from VS Code.
+   - **Using CLI**:
+     ```bash
+     zmp login
+     zmp deploy
+     ```
 
-   If you're using `zmp-cli`:
+4. **Vite Upgrade**: This project has been upgraded to Vite 5. Please refer to the [migration guide](https://miniapp.zaloplatforms.com/blog/vite-2-to-vite-5/) for more details.
 
-   ```bash
-   zmp login
-   zmp deploy
-   ```
-
-1. Scan the QR code using Zalo to preview your mini app.
+5. **Preview**: Scan the QR code using Zalo to preview your mini app.
 
 ## Usage:
 
@@ -160,3 +161,79 @@ Copyright (c) Zalo Group. and its affiliates. All rights reserved.
 
 The examples provided by Zalo Group are for non-commercial testing and evaluation
 purposes only. Zalo Group reserves all rights not expressly granted.
+
+## Troubleshooting
+
+### 1. ZMP-UI SnackbarProvider Type Error
+
+**Error Message:**
+> 'SnackbarProvider' cannot be used as a JSX component. Its type 'typeof import(...)' is not a valid JSX element type.
+
+**Cause:**
+The `zmp-ui` library's type definitions for `SnackbarProvider` do not correctly reflect its usage as a default export component in the TSX context, causing TypeScript to treat it as a module namespace instead of a React component.
+
+**Solution:**
+We manually cast the imported component to a valid `React.ComponentType`.
+
+**File:** `src/components/app.tsx`
+
+```typescript
+// 1. Alias the original import
+import { App, ZMPRouter, SnackbarProvider as SnackbarProviderOriginal } from "zmp-ui";
+
+// 2. Cast it to a valid component type
+const SnackbarProvider = SnackbarProviderOriginal as unknown as React.ComponentType<React.PropsWithChildren<any>>;
+
+// 3. Use the casted component in JSX
+<SnackbarProvider>...</SnackbarProvider>
+```
+
+### 2. Vite/Rollup Module Resolution Error
+
+**Error Message:**
+> [vite]: Rollup failed to resolve import "utils/config" from "..."
+> [vite]: Rollup failed to resolve import "hooks" from "..."
+
+**Cause:**
+While `tsconfig.json` was configured with `"baseUrl": "src"`, Vite's underlying bundler (Rollup) sometimes requires explicit path aliases to correctly resolve absolute imports for top-level directories (like `utils`, `hooks`, `components`) during the build process.
+
+**Solution:**
+We added explicit path aliases to the Vite configuration.
+
+**File:** `vite.config.mts`
+
+1.  **Install Node Types:**
+    Required for `path` and `process`.
+    ```bash
+    npm install -D @types/node
+    ```
+
+2.  **Update `tsconfig.json`:**
+    Add `"node"` to the `types` array.
+    ```json
+    "types": ["vite/client", "node"]
+    ```
+
+3.  **Update `vite.config.mts`:**
+    Import `path` and define aliases.
+
+    ```typescript
+    import path from "path";
+
+    export default () => {
+      return defineConfig({
+        // ...
+        resolve: {
+          alias: {
+            "utils": path.resolve(process.cwd(), "src/utils"),
+            "components": path.resolve(process.cwd(), "src/components"),
+            "pages": path.resolve(process.cwd(), "src/pages"),
+            "state": path.resolve(process.cwd(), "src/state"),
+            "types": path.resolve(process.cwd(), "src/types"),
+            "static": path.resolve(process.cwd(), "src/static"),
+            "hooks": path.resolve(process.cwd(), "src/hooks"),
+          },
+        },
+      });
+    };
+    ```
