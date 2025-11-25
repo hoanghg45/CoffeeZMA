@@ -35,7 +35,8 @@
     "resolveJsonModule": true,
     "baseUrl": "src",
     "types": [
-      "vite/client"
+      "vite/client",
+      "node"
     ]
   },
   "exclude": [

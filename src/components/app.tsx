@@ -1,9 +1,13 @@
 import React from "react";
-import { App, ZMPRouter, SnackbarProvider } from "zmp-ui";
+import { App, ZMPRouter, SnackbarProvider as SnackbarProviderOriginal } from "zmp-ui";
+
+
 import { RecoilRoot } from "recoil";
 import { getConfig } from "utils/config";
 import { Layout } from "./layout";
 import { ConfigProvider } from "./config-provider";
+
+const SnackbarProvider = SnackbarProviderOriginal as unknown as React.ComponentType<React.PropsWithChildren<any>>;
 
 const MyApp = () => {
   return (
