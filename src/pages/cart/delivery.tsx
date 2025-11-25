@@ -17,7 +17,7 @@ export const Delivery: FC = () => {
       <ListRenderer
         items={[
           {
-            left: <Icon icon="zi-location" className="my-auto" />,
+            left: <Icon icon="zi-location" className="my-auto text-primary" />,
             right: (
               <Suspense fallback={<RequestStorePickerLocation />}>
                 <StorePicker />
@@ -25,12 +25,12 @@ export const Delivery: FC = () => {
             ),
           },
           {
-            left: <Icon icon="zi-clock-1" className="my-auto" />,
+            left: <Icon icon="zi-clock-1" className="my-auto text-primary" />,
             right: (
               <Box flex className="space-x-2">
                 <Box className="flex-1 space-y-[2px]">
                   <TimePicker />
-                  <Text size="xSmall" className="text-gray">
+                  <Text size="xSmall" className="text-outline">
                     Thời gian nhận hàng
                   </Text>
                 </Box>
@@ -39,16 +39,16 @@ export const Delivery: FC = () => {
             ),
           },
           {
-            left: <Icon icon="zi-user" className="my-auto" />,
+            left: <Icon icon="zi-user" className="my-auto text-primary" />,
             right: <RequestPersonPickerPhone />,
           },
           {
-            left: <Icon icon="zi-note" className="my-auto" />,
+            left: <Icon icon="zi-note" className="my-auto text-primary" />,
             right: (
               <Box flex>
                 <ElasticTextarea
                   placeholder="Nhập ghi chú..."
-                  className="border-none px-0 w-full focus:outline-none"
+                  className="border-none px-0 w-full focus:outline-none bg-transparent"
                   maxRows={4}
                   value={note}
                   onChange={(e) => setNote(e.currentTarget.value)}
@@ -60,6 +60,9 @@ export const Delivery: FC = () => {
         limit={4}
         renderLeft={(item) => item.left}
         renderRight={(item) => item.right}
+        noDivider
+        className="space-y-3"
+        itemClassName="p-3 bg-surface rounded-lg border border-divider shadow-sm flex items-center space-x-3"
       />
     </Box>
   );

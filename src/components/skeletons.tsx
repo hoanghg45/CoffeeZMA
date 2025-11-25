@@ -9,9 +9,8 @@ export const TextSkeleton: FC<PropsWithChildren<BodyTextProps>> = ({
   return (
     <Text
       {...props}
-      className={`bg-skeleton text-transparent w-fit h-fit animate-pulse ${
-        className ?? ""
-      }`}
+      className={`bg-skeleton text-transparent w-fit h-fit animate-pulse ${className ?? ""
+        }`}
     />
   );
 };
@@ -30,18 +29,20 @@ export const ImageSkeleton: FC<HTMLProps<HTMLImageElement>> = ({
 
 export const ProductItemSkeleton: FC = () => {
   return (
-    <div className="space-y-2">
-      <ImageSkeleton className="w-full aspect-square rounded-lg" />
-      <TextSkeleton>1234567890</TextSkeleton>
-      <TextSkeleton size="xxSmall">20,000đ</TextSkeleton>
+    <div className="space-y-3 p-3 rounded-lg border border-divider">
+      <ImageSkeleton className="w-full aspect-square rounded-md" />
+      <div className="space-y-1">
+        <TextSkeleton>1234567890</TextSkeleton>
+        <TextSkeleton size="xxSmall">20,000đ</TextSkeleton>
+      </div>
     </div>
   );
 };
 
 export const ProductSlideSkeleton: FC = () => {
   return (
-    <div className="space-y-3">
-      <ImageSkeleton className="w-full aspect-video rounded-lg" />
+    <div className="space-y-3 p-3 rounded-lg border border-divider">
+      <ImageSkeleton className="w-full aspect-video rounded-md" />
       <Box className="space-y-1">
         <TextSkeleton size="small">1234567890</TextSkeleton>
         <TextSkeleton size="xxSmall">25,000đ</TextSkeleton>

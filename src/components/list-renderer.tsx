@@ -10,6 +10,8 @@ interface ListRendererProps<T> {
   renderKey?: (item: T) => string;
   onClick?: (item: T) => void;
   noDivider?: boolean;
+  className?: string;
+  itemClassName?: string;
 }
 
 export function ListRenderer<T>({
@@ -21,6 +23,8 @@ export function ListRenderer<T>({
   renderKey,
   onClick,
   noDivider,
+  className,
+  itemClassName,
 }: ListRendererProps<T>) {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const collapsedItems = useMemo(() => {
@@ -28,14 +32,14 @@ export function ListRenderer<T>({
   }, [items]);
 
   return (
-    <Box className="bg-background rounded-xl">
+    <Box className={`bg-background rounded-xl ${className || ""}`}>
       {title && <Text.Title className="p-4 pb-0">{title}</Text.Title>}
-      <Box>
+      <Box className={className ? "space-y-3" : ""}>
         {(isCollapsed ? collapsedItems : items).map((item, i, list) => (
           <div
             key={renderKey ? renderKey(item) : i}
             onClick={() => onClick?.(item)}
-            className="flex space-x-4 p-4 last:pb-0"
+            className={itemClassName || "flex space-x-4 p-4 last:pb-0"}
           >
             {renderLeft(item)}
             <Box className="flex-1 min-w-0 relative">

@@ -29,20 +29,20 @@ export const CartItems: FC = () => {
               }
               renderLeft={(item) => (
                 <img
-                  className="w-10 h-10 rounded-lg"
+                  className="w-16 h-16 rounded-lg object-cover border border-divider"
                   src={item.product.image}
                 />
               )}
               renderRight={(item) => (
-                <Box flex className="space-x-1">
+                <Box flex className="space-x-1 w-full">
                   <Box className="space-y-1 flex-1">
-                    <Text size="small">{item.product.name}</Text>
-                    <Text className="text-gray" size="xSmall">
+                    <Text size="normal" className="font-medium text-onSurface">{item.product.name}</Text>
+                    <Text className="text-onSurfaceVariant" size="xSmall">
                       <FinalPrice options={item.options}>
                         {item.product}
                       </FinalPrice>
                     </Text>
-                    <Text className="text-gray" size="xxxSmall">
+                    <Text className="text-outline" size="xxxSmall">
                       <DisplaySelectedOptions options={item.options}>
                         {item.product}
                       </DisplaySelectedOptions>
@@ -53,6 +53,9 @@ export const CartItems: FC = () => {
                   </Text>
                 </Box>
               )}
+              noDivider
+              className="space-y-3"
+              itemClassName="p-3 bg-surface rounded-lg border border-divider shadow-sm"
             />
           )}
         </ProductPicker>
