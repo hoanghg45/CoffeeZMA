@@ -1,6 +1,43 @@
+/* Coffee Theme Palette - Material Design 3 */
+:root {
+  /* Primary - Dark Coffee */
+  --coffee-primary: #4E342E;
+  --coffee-on-primary: #FFFFFF;
+  --coffee-primary-container: #FFDBCF;
+  --coffee-on-primary-container: #3E2723;
+
+  /* Secondary - Latte/Foam */
+  --coffee-secondary: #75564D;
+  --coffee-on-secondary: #FFFFFF;
+  --coffee-secondary-container: #EFEBE9;
+  --coffee-on-secondary-container: #3E2723;
+
+  /* Tertiary - Accent (e.g., Green Tea or Cinnamon) */
+  --coffee-tertiary: #6C5D2F;
+  --coffee-on-tertiary: #FFFFFF;
+  --coffee-tertiary-container: #F6E2A7;
+  --coffee-on-tertiary-container: #231B00;
+
+  /* Background & Surface - Cream */
+  --coffee-background: #FDFDF5;
+  --coffee-on-background: #1C1B1F;
+  --coffee-surface: #FDFDF5;
+  --coffee-on-surface: #1C1B1F;
+  --coffee-surface-variant: #F4DED4;
+  --coffee-on-surface-variant: #52433F;
+
+  /* Outline */
+  --coffee-outline: #85736E;
+  --coffee-outline-variant: #D7C2B9;
+
+  /* Legacy/Compat mappings */
+  --zmp-primary-color: var(--coffee-primary);
+  --zmp-background-color: var(--coffee-background);
+}
+
 body {
-  background-color: #FDFDF5;
-  color: #1C1B1F;
+  background-color: var(--coffee-background);
+  color: var(--coffee-on-background);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   -webkit-font-smoothing: antialiased;
   user-select: none;
@@ -8,10 +45,12 @@ body {
 
 .zaui-routes {
   height: 100%;
+  background-color: var(--coffee-background);
 }
 
 .zaui-page {
   min-height: unset;
+  background-color: var(--coffee-background);
 }
 
 .zaui-header {
@@ -19,6 +58,8 @@ body {
   height: auto;
   margin-bottom: 0;
   flex: none;
+  background-color: var(--coffee-surface);
+  color: var(--coffee-on-surface);
 
   &::after {
     display: none;
@@ -27,10 +68,12 @@ body {
 
 .zaui-input-affix-wrapper {
   margin: 0;
+  background-color: var(--coffee-surface);
+  border-color: var(--coffee-outline);
 }
 
 .border-inset {
-  border: 0.5px solid rgba(0, 0, 0, 0.1);
+  border: 0.5px solid var(--coffee-outline-variant);
 }
 
 .zaui-text-xxxxSmall {
@@ -42,75 +85,72 @@ body {
   color: var(--zmp-primary-color);
 }
 
+/* Coffee Theme Palette */
+:root {
+  --coffee-primary: #4E342E;
+  --coffee-secondary-container: #EFEBE9;
+  --coffee-on-secondary-container: #3E2723;
+  --coffee-surface: #FDFDF5;
+  --coffee-outline: #E6DCCD;
+  --coffee-inactive: #9D8F80;
+}
+
 .zaui-bottom-navigation {
   height: 80px;
   padding-bottom: env(safe-area-inset-bottom);
   box-sizing: content-box;
-  /* Critical: Height 80px + Padding = Total Height */
-  background-color: #FDFDF5;
-  /* Match M3 surface */
-  border-top: 1px solid var(--zmp-divider, #E9EBED);
+  background-color: var(--coffee-surface);
+  border-top: 1px solid var(--coffee-outline);
+  box-shadow: 0 -4px 20px rgba(78, 52, 46, 0.04);
 }
 
 .zaui-bottom-navigation-item {
   height: 100%;
-  /* Will be 80px */
-  padding: 0;
+  padding: 12px 0 16px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-}
-
-.zaui-bottom-navigation-item-active {
-  color: var(--zmp-primary-color);
+  justify-content: flex-start;
+  color: var(--coffee-inactive);
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
 
   .zaui-bottom-navigation-item-icon {
-    background-color: var(--zmp-secondary-container, #E8DEF8);
-    /* Use secondary container for active state background */
-    color: var(--zmp-on-secondary-container, #1D192B);
-    /* Use on-secondary container for icon color */
-    border-radius: 16px;
-    /* Pill shape */
-    padding: 4px 20px;
     margin-bottom: 4px;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     width: 64px;
-    /* Fixed width for pill */
     height: 32px;
-    /* Fixed height for pill */
+    border-radius: 16px;
+    background-color: transparent;
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* Ensure icon size is correct inside pill */
     >* {
       width: 24px;
       height: 24px;
     }
   }
 
-  /* Hide label if needed or style it */
+  .zaui-bottom-navigation-item-label {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: 0.1px;
+  }
 }
 
-.zaui-bottom-navigation {
-  height: 80px;
-  padding-bottom: env(safe-area-inset-bottom);
-  box-sizing: content-box;
-  /* Ensure padding adds to height */
-  background-color: #FDFDF5;
-  /* Match M3 surface */
-  border-top: 1px solid var(--zmp-divider, #E9EBED);
-}
+.zaui-bottom-navigation-item-active {
+  color: var(--coffee-primary);
 
-.zaui-bottom-navigation-item {
-  height: 100%;
-  padding-top: 12px;
-  padding-bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  /* Align from top to respect padding */
+  .zaui-bottom-navigation-item-icon {
+    background-color: transparent;
+    color: var(--coffee-primary);
+  }
+
+  .zaui-bottom-navigation-item-label {
+    font-weight: 700;
+  }
 }
 
 .zaui-btn-primary,
@@ -120,7 +160,7 @@ body {
 .zaui-btn-primary.zaui-btn-highlight:active,
 .zaui-btn-primary:focus-visible,
 .zaui-btn-primary.zaui-btn-highlight:focus-visible {
-  background-color: var(--zmp-primary-color);
+  background-color: var(--coffee-primary);
 }
 
 .zaui-btn-primary:active,
@@ -131,18 +171,18 @@ body {
 }
 
 .zaui-picker-item-selected {
-  color: var(--zmp-primary-color);
+  color: var(--coffee-primary);
 }
 
 .zaui-input-affix-wrapper-focused,
 .zaui-input-affix-wrapper:hover,
 .zaui-input-affix-wrapper:focus,
 .zaui-input-affix-wrapper:focus-visible {
-  border-color: var(--zmp-primary-color);
+  border-color: var(--coffee-primary);
 }
 
 .zaui-tabs-tabbar-active-line {
-  background-color: var(--zmp-primary-color);
+  background-color: var(--coffee-primary);
 }
 
 .category-tabs {
