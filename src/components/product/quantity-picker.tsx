@@ -18,9 +18,9 @@ export const QuantityPicker: FC<{
           </div>
         }
       />
-      <Box flex justifyContent="center" alignItems="center" className="flex-1">
+      <Box flex justifyContent="center" alignItems="center" className="flex-1 px-3">
         <Text size="large" className="font-medium">
-          Số lượng: {value}
+          {value}
         </Text>
       </Box>
       <Button

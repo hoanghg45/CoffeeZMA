@@ -20,7 +20,7 @@ export const RecommendContent: FC = () => {
           <SwiperSlide key={product.id}>
             <ProductPicker product={product}>
               {({ open }) => (
-                <div onClick={open} className="space-y-3 p-3 bg-surface rounded-lg active:bg-surfaceVariant transition-colors duration-200 border border-divider">
+                <div onClick={open} className="space-y-3 p-3 bg-secondary rounded-md active:opacity-90 transition-opacity duration-200">
                   <Box
                     className="relative aspect-video rounded-md bg-cover bg-center bg-skeleton shadow-sm"
                     style={{ backgroundImage: `url(${product.image})` }}
@@ -40,11 +40,11 @@ export const RecommendContent: FC = () => {
                     )}
                   </Box>
                   <Box className="space-y-1">
-                    <Text size="small" className="font-medium text-onSurface">{product.name}</Text>
-                    <Text size="xxSmall" className="line-through text-onSurfaceVariant">
+                    <Text size="small" className="font-medium text-onSecondary">{product.name}</Text>
+                    <Text size="xxSmall" className="line-through text-onSecondary/70">
                       <DisplayPrice>{product.price}</DisplayPrice>
                     </Text>
-                    <Text size="large" className="font-medium text-primary">
+                    <Text size="large" className="font-medium text-onSecondary">
                       <FinalPrice>{product}</FinalPrice>
                     </Text>
                   </Box>

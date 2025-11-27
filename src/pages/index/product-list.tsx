@@ -25,7 +25,7 @@ export const ProductListFallback: FC = () => {
 
   return (
     <Section title="Danh sách sản phẩm">
-      <Box className="grid grid-cols-2 gap-4">
+      <Box className="grid grid-cols-2">
         {products.map((_, i) => (
           <ProductItemSkeleton key={i} />
         ))}
