@@ -33,12 +33,12 @@ export const productsState = selector<Product[]>({
       .default as Variant[];
     return products.map(
       (product) =>
-        ({
-          ...product,
-          variants: variants.filter((variant) =>
-            product.variantId.includes(variant.id)
-          ),
-        } as Product)
+      ({
+        ...product,
+        variants: variants.filter((variant) =>
+          product.variantId.includes(variant.id)
+        ),
+      } as Product)
     );
   },
 });
@@ -60,12 +60,12 @@ export const productsByCategoryState = selectorFamily<Product[], string>({
   key: "productsByCategory",
   get:
     (categoryId) =>
-    ({ get }) => {
-      const allProducts = get(productsState);
-      return allProducts.filter((product) =>
-        product.categoryId.includes(categoryId)
-      );
-    },
+      ({ get }) => {
+        const allProducts = get(productsState);
+        return allProducts.filter((product) =>
+          product.categoryId.includes(categoryId)
+        );
+      },
 });
 
 export const cartState = atom<Cart>({
@@ -305,4 +305,25 @@ export const phoneState = selector<string | boolean>({
 export const orderNoteState = atom({
   key: "orderNote",
   default: "",
+});
+
+// Checkout state
+export const checkoutSheetVisibleState = atom({
+  key: "checkoutSheetVisible",
+  default: false,
+});
+
+export const appliedVoucherState = atom<string | null>({
+  key: "appliedVoucher",
+  default: null,
+});
+
+export const cutleryCountState = atom({
+  key: "cutleryCount",
+  default: 0,
+});
+
+export const deliveryFeeState = atom({
+  key: "deliveryFee",
+  default: 0,
 });

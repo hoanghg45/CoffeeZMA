@@ -17,31 +17,32 @@ export const Inquiry: FC = () => {
 
   return (
     <Box
-      p={4}
-      pt={6}
+      px={3}
+      pt={2}
+      pb={3}
       className="bg-white transition-all ease-out flex-none"
-      ref={
-        ((el: HTMLDivElement) => {
-          setTimeout(() => {
-            if (el) {
-              el.style.paddingTop = "8px";
-            }
-          });
-        }) as any
-      }
     >
-      <Input.Search
-        ref={(el) => {
-          if (!el?.input?.value) {
-            el?.focus();
-          }
+      <div
+        className="home-search-bar flex items-center"
+        style={{
+          paddingLeft: "12px",
+          paddingRight: "12px",
         }}
-        defaultValue={keyword}
-        onChange={(e) => handleChange(e.target.value)}
-        placeholder="Tìm nhanh đồ uống, món mới ..."
-        clearable
-        allowClear
-      />
+      >
+        <Input.Search
+          ref={(el) => {
+            if (!el?.input?.value) {
+              el?.focus();
+            }
+          }}
+          defaultValue={keyword}
+          onChange={(e) => handleChange(e.target.value)}
+          placeholder="Tìm nhanh đồ uống, món mới ..."
+          clearable
+          allowClear
+          className="border-none bg-transparent focus:outline-none w-full h-full"
+        />
+      </div>
     </Box>
   );
 };

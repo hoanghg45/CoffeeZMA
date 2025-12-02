@@ -72,6 +72,41 @@ body {
   border-color: var(--coffee-outline);
 }
 
+/* Material Design 3 Home Search Bar */
+.home-search-bar {
+  background-color: var(--coffee-surface);
+  border-radius: 20px;
+  height: 40px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:active {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  }
+
+  &:has(.zaui-input-search:focus),
+  &:has(.zaui-input-search:focus-within) {
+    box-shadow: 0 2px 8px rgba(78, 52, 46, 0.15);
+  }
+
+  .zaui-input-search {
+    font-size: 14px;
+    line-height: 20px;
+    
+    input {
+      padding: 0;
+      height: 100%;
+      font-size: 14px;
+      color: var(--coffee-on-surface);
+      
+      &::placeholder {
+        color: var(--coffee-inactive);
+        opacity: 0.7;
+      }
+    }
+  }
+}
+
 .border-inset {
   border: 0.5px solid var(--coffee-outline-variant);
 }
@@ -96,17 +131,18 @@ body {
 }
 
 .zaui-bottom-navigation {
-  height: 80px;
+  height: 70px;
   padding-bottom: env(safe-area-inset-bottom);
   box-sizing: content-box;
   background-color: var(--coffee-surface);
   border-top: 1px solid var(--coffee-outline);
   box-shadow: 0 -4px 20px rgba(78, 52, 46, 0.04);
+  border-radius: 20px 20px 0 0;
 }
 
 .zaui-bottom-navigation-item {
   height: 100%;
-  padding: 12px 0 16px 0;
+  padding: 8px 0 12px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -230,4 +266,50 @@ body {
       transform: scale(1.5);
     }
   }
+}
+
+/* Checkout Sheet Styles */
+.checkout-sheet {
+  .zaui-sheet-content {
+    border-radius: 24px 24px 0 0;
+    overflow: hidden;
+  }
+}
+
+/* Smooth Transitions */
+.transition-colors {
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-opacity {
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom Scrollbar for Checkout */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Safe Area Bottom Padding */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }
