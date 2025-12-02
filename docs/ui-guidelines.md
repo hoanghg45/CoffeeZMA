@@ -78,9 +78,9 @@ All UI components follow Apple's three core principles:
 --coffee-on-tertiary-container: #231B00;
 
 // Background & Surface - Cream
---coffee-background: #FDFDF5;
+--coffee-background: #FFFFFF;
 --coffee-on-background: #1C1B1F;
---coffee-surface: #FDFDF5;
+--coffee-surface: #FFFFFF;
 --coffee-on-surface: #1C1B1F;
 --coffee-surface-variant: #F4DED4;
 --coffee-on-surface-variant: #52433F;

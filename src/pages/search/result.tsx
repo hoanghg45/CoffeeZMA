@@ -3,15 +3,18 @@ import { ProductPicker } from "components/product/picker";
 import { ProductSearchResultSkeleton } from "components/skeletons";
 import React, { FC, Suspense } from "react";
 import { useRecoilValue } from "recoil";
-import { resultState } from "state";
+import { keywordState, resultState } from "state";
 import { Box, Text } from "zmp-ui";
 
 const SearchResultContent: FC = () => {
   const result = useRecoilValue(resultState);
+  const keyword = useRecoilValue(keywordState);
+  const hasKeyword = keyword.trim().length > 0;
+  
   return (
     <Box flex flexDirection="column" className="bg-background flex-1 min-h-0">
       <Text.Title className="p-4 pt-0" size="small">
-        Kết quả ({result.length})
+        {hasKeyword ? `Kết quả tìm kiếm (${result.length})` : `Tất cả sản phẩm (${result.length})`}
       </Text.Title>
       {result.length > 0 ? (
         <Box className="p-4 pt-0 space-y-4 flex-1 overflow-y-auto">

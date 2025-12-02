@@ -121,10 +121,13 @@ export const resultState = selector<Product[]>({
   key: "result",
   get: async ({ get }) => {
     const keyword = get(keywordState);
-    if (!keyword.trim()) {
-      return [];
-    }
     const products = get(productsState);
+    
+    // Show all products when keyword is empty (initial state)
+    if (!keyword.trim()) {
+      return products;
+    }
+    
     await wait(500);
     return products.filter((product) =>
       product.name.trim().toLowerCase().includes(keyword.trim().toLowerCase())

@@ -197,7 +197,7 @@ export const ProductPicker: FC<ProductPickerProps> = ({
               </Box>
 
               {/* Sticky Footer Action Bar */}
-              <Box className="flex-none p-4 bg-surface border-t border-divider shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-10 safe-area-bottom">
+              <Box className="flex-none p-4 mb-4 bg-surface border-t border-divider shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-10 safe-area-bottom">
                 <Box flex className="gap-4 items-center">
                   <Box className="flex-1">
                     <QuantityPicker value={quantity} onChange={setQuantity} />

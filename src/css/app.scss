@@ -1,34 +1,42 @@
 /* Coffee Theme Palette - Material Design 3 */
 :root {
-  /* Primary - Dark Coffee */
-  --coffee-primary: #4E342E;
-  --coffee-on-primary: #FFFFFF;
-  --coffee-primary-container: #FFDBCF;
-  --coffee-on-primary-container: #3E2723;
+  /* Primary - Bright Yellow */
+  --coffee-primary: #FFC900;
+  --coffee-on-primary: #000000;
+  --coffee-primary-container: #FFF3C0;
+  /* Lighter shade of yellow for container */
+  --coffee-on-primary-container: #4A3B00;
+  /* Dark contrast for container */
 
-  /* Secondary - Latte/Foam */
-  --coffee-secondary: #75564D;
+  /* Secondary - Gold/Bronze Highlight */
+  --coffee-secondary: #CC9933;
   --coffee-on-secondary: #FFFFFF;
-  --coffee-secondary-container: #EFEBE9;
-  --coffee-on-secondary-container: #3E2723;
+  --coffee-secondary-container: #F2E6CC;
+  /* Lighter shade of gold */
+  --coffee-on-secondary-container: #3D2D0F;
 
-  /* Tertiary - Accent (e.g., Green Tea or Cinnamon) */
-  --coffee-tertiary: #6C5D2F;
+  /* Tertiary - Accent */
+  --coffee-tertiary: #B38F00;
+  /* Dark Yellow Shadow used as tertiary/accent */
   --coffee-on-tertiary: #FFFFFF;
-  --coffee-tertiary-container: #F6E2A7;
-  --coffee-on-tertiary-container: #231B00;
+  --coffee-tertiary-container: #FDF7E0;
+  --coffee-on-tertiary-container: #362B00;
 
-  /* Background & Surface - Cream */
-  --coffee-background: #FDFDF5;
-  --coffee-on-background: #1C1B1F;
-  --coffee-surface: #FDFDF5;
-  --coffee-on-surface: #1C1B1F;
-  --coffee-surface-variant: #F4DED4;
-  --coffee-on-surface-variant: #52433F;
+  /* Background & Surface - White */
+  --coffee-background: #FFFFFF;
+  --coffee-on-background: #000000;
+  --coffee-surface: #FFFFFF;
+  --coffee-on-surface: #000000;
+  --coffee-surface-variant: #F5F5F5;
+  /* Light grey for subtle differentiation */
+  --coffee-on-surface-variant: #49454F;
 
-  /* Outline */
-  --coffee-outline: #85736E;
-  --coffee-outline-variant: #D7C2B9;
+  /* Outline - Dark Yellow Shadow */
+  --coffee-outline: #B38F00;
+  --coffee-outline-variant: #E6E0D0;
+
+  /* Inactive */
+  --coffee-inactive: #9D8F80;
 
   /* Legacy/Compat mappings */
   --zmp-primary-color: var(--coffee-primary);
@@ -92,13 +100,13 @@ body {
   .zaui-input-search {
     font-size: 14px;
     line-height: 20px;
-    
+
     input {
       padding: 0;
       height: 100%;
       font-size: 14px;
       color: var(--coffee-on-surface);
-      
+
       &::placeholder {
         color: var(--coffee-inactive);
         opacity: 0.7;
@@ -121,17 +129,10 @@ body {
 }
 
 /* Coffee Theme Palette */
-:root {
-  --coffee-primary: #4E342E;
-  --coffee-secondary-container: #EFEBE9;
-  --coffee-on-secondary-container: #3E2723;
-  --coffee-surface: #FDFDF5;
-  --coffee-outline: #E6DCCD;
-  --coffee-inactive: #9D8F80;
-}
+
 
 .zaui-bottom-navigation {
-  height: 70px;
+  height: 80px;
   padding-bottom: env(safe-area-inset-bottom);
   box-sizing: content-box;
   background-color: var(--coffee-surface);
