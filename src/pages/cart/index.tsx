@@ -11,13 +11,13 @@ const CartPage: FC = () => {
   const keyboardVisible = useVirtualKeyboardVisible();
 
   return (
-    <Page className="flex flex-col bg-background">
-      <Header title="Giỏ hàng" showBackIcon={false} />
-      <CartItems />
-      <Delivery />
-      <Divider size={16} />
-      <TermsAndPolicies />
-      <Divider size={32} className="flex-1" />
+    <Page className="flex flex-col bg-gray-100 min-h-screen">
+      <Header title="Giỏ hàng" showBackIcon={false} className="bg-white" />
+      <div className="flex-1 overflow-y-auto pb-4">
+        <CartItems />
+        <Delivery />
+        <TermsAndPolicies />
+      </div>
       {!keyboardVisible && <CartPreview />}
     </Page>
   );

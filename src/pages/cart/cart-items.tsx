@@ -3,14 +3,30 @@ import { DisplaySelectedOptions } from "components/display/selected-options";
 import { ListRenderer } from "components/list-renderer";
 import { ProductPicker } from "components/product/picker";
 import React, { FC, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import { cartState } from "state";
 import { CartItem } from "types/cart";
 import { Box, Text, Icon } from "zmp-ui";
 
 export const CartItems: FC = () => {
-  const cart = useRecoilValue(cartState);
+  const [cart, setCart] = useRecoilState(cartState);
   const [editingItem, setEditingItem] = useState<CartItem | undefined>();
+
+  const updateQuantity = (item: CartItem, quantity: number) => {
+    if (quantity <= 0) {
+      removeItem(item);
+      return;
+    }
+    const newCart = cart.map((i) =>
+      (i === item ? { ...i, quantity } : i)
+    );
+    setCart(newCart);
+  };
+
+  const removeItem = (item: CartItem) => {
+    const newCart = cart.filter((i) => i !== item);
+    setCart(newCart);
+  };
 
   return (
     <Box className="py-4 px-4">
@@ -30,16 +46,16 @@ export const CartItems: FC = () => {
               renderLeft={(item) => (
                 <Box className="flex-shrink-0">
                   <img
-                    className="w-20 h-20 rounded-xl object-cover shadow-sm border border-divider"
+                    className="w-16 h-16 rounded-lg object-cover shadow-sm"
                     src={item.product.image}
                     alt={item.product.name}
                   />
                 </Box>
               )}
               renderRight={(item) => (
-                <Box flex className="space-x-3 w-full min-w-0">
-                  <Box className="space-y-1.5 flex-1 min-w-0">
-                    <Text size="normal" className="font-bold text-primary leading-snug">
+                <Box flex className="space-x-2 w-full min-w-0 items-center justify-between">
+                  <Box className="space-y-0.5 flex-1 min-w-0">
+                    <Text size="normal" className="font-bold text-gray-800 leading-tight truncate">
                       {item.product.name}
                     </Text>
                     <Text className="text-gray-600 font-medium" size="small">
@@ -47,22 +63,38 @@ export const CartItems: FC = () => {
                         {item.product}
                       </FinalPrice>
                     </Text>
-                    <Text className="text-gray-500 leading-relaxed" size="xSmall">
+                    <Text className="text-gray-400 leading-none truncate" size="xxSmall">
                       <DisplaySelectedOptions options={item.options}>
                         {item.product}
                       </DisplaySelectedOptions>
                     </Text>
                   </Box>
-                  <Box className="flex-shrink-0 flex items-center">
-                    <Text className="text-primary font-bold" size="normal">
-                      x{item.quantity}
+                  <Box className="flex items-center bg-white rounded-full h-8 px-1 space-x-1 border border-gray-200 shadow-sm" onClick={(e) => e.stopPropagation()}>
+                    <Box
+                      className="w-7 h-7 flex items-center justify-center active:opacity-50 cursor-pointer"
+                      onClick={() => updateQuantity(item, item.quantity - 1)}
+                    >
+                      {item.quantity === 1 ? (
+                        <Icon icon="zi-close" size={14} className="text-red-500" />
+                      ) : (
+                        <div className="w-2.5 h-[1.5px] bg-gray-600" />
+                      )}
+                    </Box>
+                    <Text size="small" className="font-bold text-gray-800 min-w-[16px] text-center">
+                      {item.quantity}
                     </Text>
+                    <Box
+                      className="w-7 h-7 flex items-center justify-center active:opacity-50 cursor-pointer"
+                      onClick={() => updateQuantity(item, item.quantity + 1)}
+                    >
+                      <Icon icon="zi-plus" size={14} className="text-primary" />
+                    </Box>
                   </Box>
                 </Box>
               )}
               noDivider
               className="space-y-3"
-              itemClassName="p-4 bg-surface rounded-xl border border-divider shadow-sm active:bg-surfaceVariant transition-colors duration-200"
+              itemClassName="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 shadow-sm active:scale-[0.99] transition-transform duration-200"
             />
           )}
         </ProductPicker>

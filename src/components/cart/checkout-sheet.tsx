@@ -52,7 +52,7 @@ export const CheckoutSheet: FC = () => {
                 >
                     <Box className="flex flex-col h-full bg-white rounded-t-3xl overflow-hidden">
                         {/* Header */}
-                        <Box className="flex-none px-4 pt-4 pb-3 border-b border-gray-100 relative">
+                        <Box className="flex-none px-4 py-4 pb-3 border-b border-gray-100 relative">
                             <Text.Title size="large" className="text-center font-bold">
                                 Cart
                             </Text.Title>
@@ -67,7 +67,7 @@ export const CheckoutSheet: FC = () => {
                         {/* Scrollable Content */}
                         <Box className="flex-1 overflow-y-auto">
                             {cart.length > 0 ? (
-                                <Box className="px-4">
+                                <Box className="px-4 py-4">
                                     {/* Cart Items */}
                                     <Box className="divide-y divide-gray-100">
                                         {cart.map((item, index) => (
@@ -120,7 +120,7 @@ export const CheckoutSheet: FC = () => {
                                     </Box>
                                 </Box>
                             ) : (
-                                <Box className="flex flex-col items-center justify-center h-full px-4 pb-20">
+                                <Box className="flex flex-col items-center justify-center h-full px-4 py-4 pb-20">
                                     <Box className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                                         <Icon icon="zi-delete" size={40} className="text-gray-400" />
                                     </Box>

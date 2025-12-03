@@ -1,18 +1,13 @@
 import React, { FC } from "react";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { cartState, checkoutSheetVisibleState } from "state";
+import { useRecoilValue } from "recoil";
+import { cartState } from "state";
 import { Box, Text } from "zmp-ui";
 
 export const CartIcon: FC<{ active?: boolean }> = ({ active }) => {
   const cart = useRecoilValue(cartState);
-  const setCheckoutVisible = useSetRecoilState(checkoutSheetVisibleState);
-
-  const handleClick = () => {
-    setCheckoutVisible(true);
-  };
 
   return (
-    <Box className="relative" onClick={handleClick}>
+    <Box className="relative">
       <svg
         width="24"
         height="24"

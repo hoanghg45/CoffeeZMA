@@ -50,22 +50,20 @@ export function ListRenderer<T>({
             </Box>
           </div>
         ))}
+        {isCollapsed && collapsedItems.length < items.length && (
+          <Box className="p-2">
+            <Button
+              onClick={() => setIsCollapsed(false)}
+              fullWidth
+              suffixIcon={<Icon icon="zi-chevron-down" />}
+              variant="tertiary"
+              type="neutral"
+            >
+              Xem thêm
+            </Button>
+          </Box>
+        )}
       </Box>
-      {isCollapsed && collapsedItems.length < items.length ? (
-        <Box className="p-2">
-          <Button
-            onClick={() => setIsCollapsed(false)}
-            fullWidth
-            suffixIcon={<Icon icon="zi-chevron-down" />}
-            variant="tertiary"
-            type="neutral"
-          >
-            Xem thêm
-          </Button>
-        </Box>
-      ) : (
-        <Box className="w-full h-4"></Box>
-      )}
     </Box>
   );
 }

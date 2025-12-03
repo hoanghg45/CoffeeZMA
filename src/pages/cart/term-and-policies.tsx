@@ -3,7 +3,7 @@ import { Text, Box } from "zmp-ui";
 
 export const TermsAndPolicies: FC = () => {
   return (
-    <Box className="px-4">
+    <Box className="px-4 py-4">
       <Text className="text-gray-500 leading-relaxed" size="small">
         Bằng việc tiến hành thanh toán, bạn đồng ý với{" "}
         <Text className="text-primary underline" size="small">
