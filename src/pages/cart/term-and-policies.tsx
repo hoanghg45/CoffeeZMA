@@ -1,11 +1,16 @@
 import React, { FC } from "react";
-import { Text } from "zmp-ui";
+import { Text, Box } from "zmp-ui";
 
 export const TermsAndPolicies: FC = () => {
   return (
-    <Text className="text-gray px-4" size="xxSmall">
-      Bằng việc tiến hành thanh toán, bạn đồng ý với điều kiện và điều khoản sử
-      dụng của Zalo Mini App
-    </Text>
+    <Box className="px-4">
+      <Text className="text-gray-500 leading-relaxed" size="small">
+        Bằng việc tiến hành thanh toán, bạn đồng ý với{" "}
+        <Text className="text-primary underline" size="small">
+          điều kiện và điều khoản sử dụng
+        </Text>{" "}
+        của Zalo Mini App
+      </Text>
+    </Box>
   );
 };
