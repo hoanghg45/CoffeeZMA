@@ -56,7 +56,7 @@ export const TimePicker: FC = () => {
       mask
       maskClosable
       onVisibilityChange={(visbile) => matchStatusBarColor(visbile)}
-      inputClass="border-none bg-transparent text-sm text-primary font-medium text-md m-0 p-0 h-auto"
+      inputClass="border-none bg-transparent text-sm text-gray-800 font-medium text-md m-0 p-0 h-auto"
       placeholder="Chọn thời gian nhận hàng"
       title="Thời gian nhận hàng"
       value={{
@@ -68,8 +68,8 @@ export const TimePicker: FC = () => {
       formatPickedValueDisplay={({ date, time }) =>
         date && time
           ? `${displayHalfAnHourTimeRange(new Date(time.value))}, ${displayDate(
-              new Date(date.value)
-            )}`
+            new Date(date.value)
+          )}`
           : `Chọn thời gian`
       }
       onChange={({ date, time }) => {
