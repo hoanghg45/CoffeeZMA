@@ -12,6 +12,7 @@ import {
   requestPhoneTriesState
 } from "state";
 import { AddressPicker } from "components/address-picker";
+import { BranchPicker } from "components/branch-picker";
 
 export const Delivery: FC = () => {
   const [note, setNote] = useRecoilState(orderNoteState);
@@ -43,10 +44,17 @@ export const Delivery: FC = () => {
           <AddressPicker />
         </Suspense>
 
-        {/* Store Selection (Source) */}
-        <Box className="p-3">
-          <Text size="xSmall" className="text-gray-500 mb-1">Giao từ cửa hàng</Text>
-          <Text size="small" className="font-medium">{selectedStore?.name || "Đang tìm cửa hàng gần nhất..."}</Text>
+        {/* Branch Selection (Source) */}
+        <Box className="flex items-start space-x-3">
+          <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mt-1">
+            <Icon icon="zi-home" className="text-yellow-600" size={20} />
+          </Box>
+          <Box className="flex-1">
+            <Text size="xSmall" className="text-gray-500 mb-1">Giao từ cửa hàng</Text>
+            <Suspense fallback={<Box className="p-2"><Text className="text-gray-400 text-sm">Đang tải cửa hàng...</Text></Box>}>
+              <BranchPicker />
+            </Suspense>
+          </Box>
         </Box>
 
         {/* Fee Display */}

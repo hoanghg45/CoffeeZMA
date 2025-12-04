@@ -15,7 +15,7 @@ export const PersonPicker: FC = () => {
       <Text size="small" className="font-medium text-sm text-gray-800">
         {user.state === "hasValue" ? `${user.contents.name} - ${phone}` : phone}
       </Text>
-      <Text size="xSmall" className="text-gray">
+      <Text size="xSmall" className="text-gray-500">
         Người nhận
       </Text>
     </Box>
@@ -34,7 +34,7 @@ export const RequestPersonPickerPhone: FC = () => {
       <Text size="small" className="font-bold text-sm text-gray-800">
         Chọn người nhận
       </Text>
-      <Text size="xSmall" className="text-gray">
+      <Text size="xSmall" className="text-gray-500">
         Yêu cầu truy cập số điện thoại
       </Text>
     </Box>

@@ -1,6 +1,6 @@
 import { getConfig } from "../utils/config";
 
-// Types for AhaMove API
+// Types for AhaMove API v3
 interface AhaMovePoint {
   lat: number;
   lng: number;
@@ -19,6 +19,10 @@ interface AhaMoveItem {
 export interface EstimateFeeParams {
   path: AhaMovePoint[];
   items: AhaMoveItem[];
+  payment_method?: string;
+  order_time?: number;
+  remarks?: string;
+  promo_code?: string;
 }
 
 export interface EstimateFeeResponse {
@@ -28,51 +32,68 @@ export interface EstimateFeeResponse {
   currency: string;
 }
 
-// This should be moved to a secure backend in production
-const AHAMOVE_API_URL = "https://apistg.ahamove.com/v1";
-const AHAMOVE_TOKEN = "0d885280ed9d3ab162ba52f01ff8ada44ebec7a4"; // Placeholder - needs real token
+// AhaMove Partner API v3 endpoint
+const AHAMOVE_API_URL = "https://partner-apistg.ahamove.com/v3";
 
 export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFeeResponse> => {
   try {
-    // Mock response for development/demo if no real token
-    // Remove this block when integrating real API
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Simple mock calculation: 5000 base + 5000 per km
-        const distanceKm = Math.random() * 5 + 1; // Random 1-6km
-        const total = 15000 + Math.round(distanceKm * 5000);
-        
-        resolve({
-          total_pay: total,
-          distance: distanceKm,
-          duration: distanceKm * 5, // 5 mins per km
-          currency: "VND"
-        });
-      }, 1000);
-    });
+    const token = import.meta.env.VITE_AHAMOVE_TOKEN;
+    
+    if (!token) {
+      console.warn("AhaMove token is missing!");
+      return {
+        total_pay: 30000,
+        distance: 0,
+        duration: 0,
+        currency: "VND"
+      };
+    }
 
-    /* Real implementation
-    const response = await fetch(`${AHAMOVE_API_URL}/order/estimated_fee`, {
+    // AhaMove v3 API structure
+    const requestBody: any = {
+      path: params.path,
+      services: ["SGN-BIKE"], // Service ID array
+      items: params.items,
+      payment_method: params.payment_method || "CASH" // Default to cash on delivery
+    };
+
+    // Add optional fields if provided
+    if (params.order_time) {
+      requestBody.order_time = params.order_time;
+    }
+    if (params.remarks) {
+      requestBody.remarks = params.remarks;
+    }
+    if (params.promo_code) {
+      requestBody.promo_code = params.promo_code;
+    }
+
+    const response = await fetch(`${AHAMOVE_API_URL}/orders/estimates`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${AHAMOVE_TOKEN}`
+        "Authorization": `Bearer ${token}`
       },
-      body: JSON.stringify({
-        order: {
-          path: params.path,
-          items: params.items,
-          service_id: "SGN-BIKE" // Or specific service ID
-        }
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch estimate");
+      const errorText = await response.text();
+      console.error("AhaMove API error:", errorText);
+      throw new Error(`Failed to fetch estimate: ${response.status} ${response.statusText}`);
     }
 
-    return await response.json();
-    */
+    const data = await response.json();
+    
+    // Handle AhaMove v3 response structure
+    // The response may have different structure, adjust based on actual API response
+    return {
+      total_pay: data.total_pay || data.fee || 30000,
+      distance: data.distance || 0,
+      duration: data.duration || 0,
+      currency: data.currency || "VND"
+    };
+
   } catch (error) {
     console.error("Error estimating fee:", error);
     return {
@@ -83,4 +104,3 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
     };
   }
 };
-

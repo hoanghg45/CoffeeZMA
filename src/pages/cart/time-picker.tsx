@@ -56,7 +56,7 @@ export const TimePicker: FC = () => {
       mask
       maskClosable
       onVisibilityChange={(visbile) => matchStatusBarColor(visbile)}
-      inputClass="border-none bg-transparent text-sm text-gray-800 font-medium text-md m-0 p-0 h-auto"
+      inputClass="zaui-input zaui-picker-input zaui-text-xSmall border-none bg-transparent text-gray-500 m-0 p-0 h-auto"
       placeholder="Chọn thời gian nhận hàng"
       title="Thời gian nhận hàng"
       value={{

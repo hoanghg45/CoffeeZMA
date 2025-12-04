@@ -4,4 +4,5 @@ export interface Store {
   address: string;
   lat: number;
   long: number;
+  phone?: string;
 }

@@ -13,6 +13,7 @@ import { getProducts } from "services/product";
 import { getVariants } from "services/variant";
 import { estimateFee } from "services/ahamove";
 import { getUserAddresses, UserAddress, ensureUserExists } from "services/user";
+import { getBranches } from "services/branch";
 
 export const userState = selector({
   key: "user",
@@ -149,49 +150,61 @@ export const resultState = selector<Product[]>({
   },
 });
 
-export const storesState = atom<Store[]>({
+export const storesState = selector<Store[]>({
   key: "stores",
-  default: [
-    {
-      id: 1,
-      name: "VNG Campus Store",
-      address:
-        "Khu chế xuất Tân Thuận, Z06, Số 13, Tân Thuận Đông, Quận 7, Thành phố Hồ Chí Minh, Việt Nam",
-      lat: 10.741639,
-      long: 106.714632,
-    },
-    {
-      id: 2,
-      name: "The Independence Palace",
-      address:
-        "135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1, Thành phố Hồ Chí Minh, Việt Nam",
-      lat: 10.779159,
-      long: 106.695271,
-    },
-    {
-      id: 3,
-      name: "Saigon Notre-Dame Cathedral Basilica",
-      address:
-        "1 Công xã Paris, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh, Việt Nam",
-      lat: 10.779738,
-      long: 106.699092,
-    },
-    {
-      id: 4,
-      name: "Bình Quới Tourist Village",
-      address:
-        "1147 Bình Quới, phường 28, Bình Thạnh, Thành phố Hồ Chí Minh, Việt Nam",
-      lat: 10.831098,
-      long: 106.733128,
-    },
-    {
-      id: 5,
-      name: "Củ Chi Tunnels",
-      address: "Phú Hiệp, Củ Chi, Thành phố Hồ Chí Minh, Việt Nam",
-      lat: 11.051655,
-      long: 106.494249,
-    },
-  ],
+  get: async () => {
+    const branches = await getBranches();
+    // Fallback to hardcoded stores if database is empty
+    if (branches.length === 0) {
+      return [
+        {
+          id: 1,
+          name: "VNG Campus Store",
+          address:
+            "Khu chế xuất Tân Thuận, Z06, Số 13, Tân Thuận Đông, Quận 7, Thành phố Hồ Chí Minh, Việt Nam",
+          lat: 10.741639,
+          long: 106.714632,
+          phone: "02873001234",
+        },
+        {
+          id: 2,
+          name: "The Independence Palace",
+          address:
+            "135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1, Thành phố Hồ Chí Minh, Việt Nam",
+          lat: 10.779159,
+          long: 106.695271,
+          phone: "02838223629",
+        },
+        {
+          id: 3,
+          name: "Saigon Notre-Dame Cathedral Basilica",
+          address:
+            "1 Công xã Paris, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh, Việt Nam",
+          lat: 10.779738,
+          long: 106.699092,
+          phone: "02838223629",
+        },
+        {
+          id: 4,
+          name: "Bình Quới Tourist Village",
+          address:
+            "1147 Bình Quới, phường 28, Bình Thạnh, Thành phố Hồ Chí Minh, Việt Nam",
+          lat: 10.831098,
+          long: 106.733128,
+          phone: "02873001234",
+        },
+        {
+          id: 5,
+          name: "Củ Chi Tunnels",
+          address: "Phú Hiệp, Củ Chi, Thành phố Hồ Chí Minh, Việt Nam",
+          lat: 11.051655,
+          long: 106.494249,
+          phone: "02873001234",
+        },
+      ];
+    }
+    return branches;
+  },
 });
 
 export const nearbyStoresState = selector({
@@ -226,17 +239,24 @@ export const nearbyStoresState = selector({
   },
 });
 
-export const selectedStoreIndexState = atom({
-  key: "selectedStoreIndex",
-  default: 0,
+export const selectedStoreIdState = atom<number | null>({
+  key: "selectedStoreId",
+  default: null,
 });
 
-export const selectedStoreState = selector({
+export const selectedStoreState = selector<Store | null>({
   key: "selectedStore",
   get: ({ get }) => {
-    const index = get(selectedStoreIndexState);
-    const stores = get(nearbyStoresState);
-    return stores[index];
+    const storeId = get(selectedStoreIdState);
+    const stores = get(storesState);
+    
+    if (storeId !== null) {
+      const store = stores.find(s => s.id === storeId);
+      if (store) return store;
+    }
+    
+    // Fallback to first store if no selection
+    return stores.length > 0 ? stores[0] : null;
   },
 });
 
@@ -261,14 +281,16 @@ export const locationState = selector<
   key: "location",
   get: async ({ get }) => {
     const requested = get(requestLocationTriesState);
-    if (requested) {
-      const { latitude, longitude, token } = await getLocation({
-        fail: console.warn,
-      });
-      if (latitude && longitude) {
-        return { latitude, longitude };
-      }
-      if (token) {
+    // Always attempt to get location when this selector is accessed (lazy)
+    // The requested dependency ensures we can trigger a retry
+    
+    const { latitude, longitude, token } = await getLocation({
+      fail: console.warn,
+    });
+    if (latitude && longitude) {
+      return { latitude, longitude };
+    }
+    if (token) {
         console.warn(
           "Sử dụng token này để truy xuất vị trí chính xác của người dùng",
           token
@@ -279,11 +301,11 @@ export const locationState = selector<
         );
         console.warn("Giả lập vị trí mặc định: VNG Campus");
         return {
-          latitude: "10.7287",
-          longitude: "106.7317",
-        };
-      }
+        latitude: "10.7287",
+        longitude: "106.7317",
+      };
     }
+    
     return false;
   },
 });
@@ -370,23 +392,38 @@ export const calculatedDeliveryFeeState = selector({
     const address = get(selectedAddressState);
     const store = get(selectedStoreState);
     const cart = get(cartState);
+    const user = get(userState);
 
     if (!address || !store || cart.length === 0) {
       return 0;
     }
 
-    // Mock fee estimation via AhaMove
+    // Enriched fee estimation via AhaMove v3 API
+    // Include name and mobile for both pickup and delivery points
     const fee = await estimateFee({
       path: [
-        { lat: store.lat, lng: store.long, address: store.address },
-        { lat: address.lat, lng: address.long, address: address.address }
+        { 
+          lat: store.lat, 
+          lng: store.long, 
+          address: store.address,
+          name: store.name,
+          mobile: store.phone || "02873001234" // Fallback phone
+        },
+        { 
+          lat: address.lat, 
+          lng: address.long, 
+          address: address.address,
+          name: address.name || user.name,
+          mobile: address.phone
+        }
       ],
       items: cart.map(item => ({
         _id: String(item.product.id),
         name: item.product.name,
         price: item.product.price,
         num: item.quantity
-      }))
+      })),
+      payment_method: "CASH" // Default to cash on delivery
     });
 
     return fee.total_pay;

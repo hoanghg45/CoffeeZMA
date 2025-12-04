@@ -51,16 +51,33 @@ export const AddressPicker: FC = () => {
 
   const handleGetCurrentLocation = async () => {
     try {
-      const { latitude, longitude } = await getLocation({});
-      // Mock reverse geocoding for demo
+      const { latitude, longitude } = await getLocation({
+        fail: console.warn
+      });
+      
+      if (!latitude || !longitude) {
+        console.warn("Location not available");
+        return;
+      }
+      
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+      
+      if (isNaN(lat) || isNaN(lng)) {
+        console.warn("Invalid coordinates");
+        return;
+      }
+      
+      // Set coordinates - address will need to be filled manually or via reverse geocoding API
       setForm(prev => ({
         ...prev,
-        lat: parseFloat(latitude || "0"),
-        long: parseFloat(longitude || "0"),
-        address: `Lat: ${latitude}, Long: ${longitude}` // Should use an API to get address string
+        lat,
+        long: lng,
+        // Don't set address to coordinates - let user enter proper address
+        // In production, use reverse geocoding API here
       }));
     } catch (error) {
-      console.error(error);
+      console.error("Error getting location:", error);
     }
   };
 
@@ -73,9 +90,9 @@ export const AddressPicker: FC = () => {
         <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-2">
           <Icon icon="zi-location" className="text-yellow-600" size={20} />
         </Box>
-        <Box className="flex-1">
-          <Text.Title size="small" className="font-bold">{selectedAddress?.name || "Chọn địa chỉ"}</Text.Title>
-          <Text size="xSmall" className="text-gray-500 truncate">
+        <Box className="flex-1 min-w-0">
+          <Text.Title size="small" className="font-bold truncate">{selectedAddress?.name || "Chọn địa chỉ"}</Text.Title>
+          <Text size="xSmall" className="text-gray-500 line-clamp-2 break-words">
             {selectedAddress?.address || "Vui lòng chọn địa chỉ giao hàng"}
           </Text> 
         </Box>
@@ -165,4 +182,3 @@ export const AddressPicker: FC = () => {
     </>
   );
 };
-
