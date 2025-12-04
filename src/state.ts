@@ -1,45 +1,59 @@
 import { atom, selector, selectorFamily } from "recoil";
 import { getLocation, getPhoneNumber, getUserInfo } from "zmp-sdk";
 import logo from "static/logo.png";
-import { Category } from "types/category";
-import { Product, Variant } from "types/product";
+import { Product } from "types/product";
 import { Cart } from "types/cart";
 import { Notification } from "types/notification";
-import { calculateDistance } from "utils/location";
 import { Store } from "types/delivery";
+import { calculateDistance } from "utils/location";
 import { calcFinalPrice } from "utils/product";
 import { wait } from "utils/async";
-import categories from "../mock/categories.json";
+import { getCategories } from "services/category";
+import { getProducts } from "services/product";
+import { getVariants } from "services/variant";
+import { estimateFee } from "services/ahamove";
+import { getUserAddresses, UserAddress, ensureUserExists } from "services/user";
 
 export const userState = selector({
   key: "user",
   get: async () => {
     const { userInfo } = await getUserInfo({ autoRequestPermission: true });
+    // Ensure user exists in DB
+    await ensureUserExists({
+      id: userInfo.id,
+      name: userInfo.name,
+      avatar: userInfo.avatar
+    });
     return userInfo;
   },
 });
 
-export const categoriesState = selector<Category[]>({
+export const categoriesState = selector({
   key: "categories",
-  get: () => categories,
+  get: async () => {
+    return await getCategories();
+  },
 });
 
 export const productsState = selector<Product[]>({
   key: "products",
   get: async () => {
-    await wait(2000);
-    const products = (await import("../mock/products.json")).default;
-    const variants = (await import("../mock/variants.json"))
-      .default as Variant[];
-    return products.map(
-      (product) =>
-      ({
+    const [products, variants] = await Promise.all([
+      getProducts(),
+      getVariants()
+    ]);
+
+    return products.map((product) => {
+      // Access the variantId that comes from the DB service but isn't on the official Product type
+      const productWithIds = product as unknown as { variantId?: string[] };
+      
+      return {
         ...product,
         variants: variants.filter((variant) =>
-          product.variantId.includes(variant.id)
+          productWithIds.variantId?.includes(variant.id)
         ),
-      } as Product)
-    );
+      };
+    });
   },
 });
 
@@ -329,4 +343,52 @@ export const cutleryCountState = atom({
 export const deliveryFeeState = atom({
   key: "deliveryFee",
   default: 0,
+});
+
+// Delivery mode is now always "delivery" - pickup option removed
+export const deliveryModeState = atom<"delivery">({
+  key: "deliveryMode",
+  default: "delivery",
+});
+
+export const selectedAddressState = atom<UserAddress | null>({
+  key: "selectedAddress",
+  default: null,
+});
+
+export const userAddressesState = selector<UserAddress[]>({
+  key: "userAddresses",
+  get: async ({ get }) => {
+    const user = get(userState);
+    return await getUserAddresses(user.id);
+  },
+});
+
+export const calculatedDeliveryFeeState = selector({
+  key: "calculatedDeliveryFee",
+  get: async ({ get }) => {
+    const address = get(selectedAddressState);
+    const store = get(selectedStoreState);
+    const cart = get(cartState);
+
+    if (!address || !store || cart.length === 0) {
+      return 0;
+    }
+
+    // Mock fee estimation via AhaMove
+    const fee = await estimateFee({
+      path: [
+        { lat: store.lat, lng: store.long, address: store.address },
+        { lat: address.lat, lng: address.long, address: address.address }
+      ],
+      items: cart.map(item => ({
+        _id: String(item.product.id),
+        name: item.product.name,
+        price: item.product.price,
+        num: item.quantity
+      }))
+    });
+
+    return fee.total_pay;
+  },
 });

@@ -1,25 +1,25 @@
-import React, { FC } from "react";
-import { Box, Header, Icon, Page, Text } from "zmp-ui";
+import React, { FC, useState, Suspense } from "react";
+import { Box, Header, Icon, Page, Text, Sheet } from "zmp-ui";
 import subscriptionDecor from "static/subscription-decor.svg";
 import { ListRenderer } from "components/list-renderer";
 import { useToBeImplemented } from "hooks";
-import { useRecoilCallback } from "recoil";
+import { useRecoilCallback, useRecoilValue } from "recoil";
 import { userState } from "state";
+import { AddressPicker } from "components/address-picker";
 
 const Subscription: FC = () => {
-  const requestUserInfo = useRecoilCallback(
-    ({ snapshot }) =>
-      async () => {
-        const userInfo = await snapshot.getPromise(userState);
-        console.warn("Các bên tích hợp có thể sử dụng userInfo ở đây...", {
-          userInfo,
-        });
-      },
-    []
-  );
-
+  // Suspense might be needed here too if userState suspends, but it's usually handled by RecoilRoot or upper bounds. 
+  // However, for safety, we can wrap usage in components or rely on error boundaries.
+  // Since we are in a Page, let's rely on the userState being loaded or suspended at Page level if we don't wrap.
+  // BUT, ProfilePage is rendered directly.
+  
+  // Actually, safe to assume userState loads fast or we use Loadable.
+  // But let's check if userState suspends. Yes it does (async).
+  // So we should wrap the content of Subscription or the whole component call.
+  const user = useRecoilValue(userState);
+  
   return (
-    <Box className="m-4" onClick={requestUserInfo}>
+    <Box className="m-4">
       <Box
         className="bg-green text-white rounded-xl p-4 space-y-2"
         style={{
@@ -28,8 +28,8 @@ const Subscription: FC = () => {
           backgroundRepeat: "no-repeat",
         }}
       >
-        <Text.Title className="font-bold">Đăng ký thành viên</Text.Title>
-        <Text size="xxSmall">Tích điểm đổi thưởng, mở rộng tiện ích</Text>
+        <Text.Title className="font-bold">{user.name}</Text.Title>
+        <Text size="xxSmall">Thành viên</Text>
       </Box>
     </Box>
   );
@@ -37,6 +37,7 @@ const Subscription: FC = () => {
 
 const Personal: FC = () => {
   const onClick = useToBeImplemented();
+  const [addressSheetVisible, setAddressSheetVisible] = useState(false);
 
   return (
     <Box className="m-4">
@@ -50,6 +51,17 @@ const Personal: FC = () => {
               <Box flex>
                 <Text.Header className="flex-1 items-center font-normal">
                   Thông tin tài khoản
+                </Text.Header>
+                <Icon icon="zi-chevron-right" />
+              </Box>
+            ),
+          },
+          {
+            left: <Icon icon="zi-location" />,
+            right: (
+              <Box flex onClick={() => setAddressSheetVisible(true)}>
+                <Text.Header className="flex-1 items-center font-normal">
+                  Sổ địa chỉ
                 </Text.Header>
                 <Icon icon="zi-chevron-right" />
               </Box>
@@ -70,6 +82,21 @@ const Personal: FC = () => {
         renderLeft={(item) => item.left}
         renderRight={(item) => item.right}
       />
+
+      <Sheet
+        visible={addressSheetVisible}
+        onClose={() => setAddressSheetVisible(false)}
+        mask
+        swipeToClose
+        height="auto"
+        title="Quản lý địa chỉ"
+      >
+        <Box className="p-4 pb-8">
+          <Suspense fallback={<Box className="p-4 text-center">Đang tải...</Box>}>
+            <AddressPicker />
+          </Suspense>
+        </Box>
+      </Sheet>
     </Box>
   );
 };
@@ -117,7 +144,9 @@ const ProfilePage: FC = () => {
   return (
     <Page>
       <Header showBackIcon={false} title="&nbsp;" />
-      <Subscription />
+      <Suspense fallback={<Box className="p-4">Đang tải thông tin...</Box>}>
+        <Subscription />
+      </Suspense>
       <Personal />
       <Other />
     </Page>

@@ -1,28 +1,28 @@
-import { ListItem } from "components/list-item";
 import React, { FC } from "react";
 import {
   useRecoilValue,
   useRecoilValueLoadable,
-  useSetRecoilState,
 } from "recoil";
-import { phoneState, requestPhoneTriesState, userState } from "state";
+import { phoneState, userState } from "state";
+import { Box, Text } from "zmp-ui";
 
 export const PersonPicker: FC = () => {
   const user = useRecoilValueLoadable(userState);
   const phone = useRecoilValue(phoneState);
 
   return (
-    <ListItem
-      title={
-        user.state === "hasValue" ? `${user.contents.name} - ${phone}` : phone
-      }
-      subtitle="Người nhận"
-    />
+    <Box className="flex-1 space-y-[2px]">
+      <Text size="small" className="font-medium text-sm text-gray-800">
+        {user.state === "hasValue" ? `${user.contents.name} - ${phone}` : phone}
+      </Text>
+      <Text size="xSmall" className="text-gray">
+        Người nhận
+      </Text>
+    </Box>
   );
 };
 
 export const RequestPersonPickerPhone: FC = () => {
-  const retry = useSetRecoilState(requestPhoneTriesState);
   const phone = useRecoilValueLoadable(phoneState);
 
   if (phone.state === "hasValue" && phone.contents) {
@@ -30,10 +30,13 @@ export const RequestPersonPickerPhone: FC = () => {
   }
 
   return (
-    <ListItem
-      onClick={() => retry((r) => r + 1)}
-      title="Chọn người nhận"
-      subtitle="Yêu cầu truy cập số điện thoại"
-    />
+    <Box className="flex-1 space-y-[2px]">
+      <Text size="small" className="font-bold text-sm text-gray-800">
+        Chọn người nhận
+      </Text>
+      <Text size="xSmall" className="text-gray">
+        Yêu cầu truy cập số điện thoại
+      </Text>
+    </Box>
   );
 };
