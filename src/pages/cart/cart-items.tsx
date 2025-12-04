@@ -101,7 +101,7 @@ export const CartItems: FC = () => {
       ) : (
         <Box className="flex flex-col items-center justify-center py-16 px-4">
           <Box className="w-24 h-24 bg-surfaceVariant rounded-full flex items-center justify-center mb-4">
-            <Icon icon="zi-shopping-cart" size={40} className="text-gray-400" />
+            <Icon icon="zi-inbox" size={40} className="text-gray-400" />
           </Box>
           <Text.Title size="small" className="text-gray-500 mb-2 text-center font-bold">
             Giỏ hàng trống

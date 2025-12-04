@@ -10,7 +10,7 @@ export const CartPreview: FC = () => {
   const totalPrice = useRecoilValue(totalPriceState);
 
   return (
-    <Box className="sticky bottom-0 bg-surface border-t border-divider shadow-[0_-4px_20px_rgba(0,0,0,0.08)] safe-area-bottom p-4 space-y-4">
+    <Box className="sticky bottom-0 bg-surface border-t border-divider shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] space-y-4">
       {/* Subtotal Row */}
       <Box className="flex justify-between items-center px-1">
         <Text size="large" className="font-bold text-gray-800">Tổng cộng</Text>

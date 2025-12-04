@@ -13,7 +13,7 @@ interface AhaMoveItem {
   _id: string;
   name: string;
   price: number;
-  num: number;
+  num: number;a
 }
 
 export interface EstimateFeeParams {

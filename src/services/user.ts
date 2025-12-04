@@ -97,6 +97,61 @@ export const saveUserAddress = async (address: Omit<UserAddress, 'id'> & { id?: 
   }
 };
 
+export const deleteUserAddress = async (addressId: string, userId: string): Promise<boolean> => {
+  try {
+    const client = await pool.connect();
+    
+    try {
+      await client.query('BEGIN');
+      
+      // Check if this is the default address
+      const checkResult = await client.query(
+        'SELECT is_default FROM user_addresses WHERE id = $1 AND user_id = $2',
+        [addressId, userId]
+      );
+      
+      if (checkResult.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return false;
+      }
+      
+      const isDefault = checkResult.rows[0].is_default;
+      
+      // Delete the address
+      const deleteResult = await client.query(
+        'DELETE FROM user_addresses WHERE id = $1 AND user_id = $2 RETURNING id',
+        [addressId, userId]
+      );
+      
+      // If deleted address was default and there are other addresses, set the first one as default
+      if (isDefault && deleteResult.rows.length > 0) {
+        const remainingResult = await client.query(
+          'SELECT id FROM user_addresses WHERE user_id = $1 ORDER BY created_at ASC LIMIT 1',
+          [userId]
+        );
+        
+        if (remainingResult.rows.length > 0) {
+          await client.query(
+            'UPDATE user_addresses SET is_default = true WHERE id = $1',
+            [remainingResult.rows[0].id]
+          );
+        }
+      }
+      
+      await client.query('COMMIT');
+      return true;
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error("Error deleting user address:", error);
+    return false;
+  }
+};
+
 export const ensureUserExists = async (userInfo: { id: string; name: string; avatar: string }) => {
   try {
     // Simplified upsert

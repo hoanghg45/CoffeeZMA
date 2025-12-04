@@ -1,8 +1,14 @@
 import { Pool } from "@neondatabase/serverless";
 
-// Note: In a real production app, use environment variables.
-// For ZMP, these would likely be injected at build time or fetched from a secure backend.
-const CONNECTION_STRING = "postgresql://neondb_owner:npg_isULh8uRDq7j@ep-broad-frost-a1qj1k5d-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require";
+// Database connection string from environment variable
+// Set VITE_DATABASE_URL in your .env file
+const CONNECTION_STRING = import.meta.env.VITE_DATABASE_URL;
+
+if (!CONNECTION_STRING) {
+  throw new Error(
+    "VITE_DATABASE_URL environment variable is required. Please set it in your .env file."
+  );
+}
 
 export const pool = new Pool({
   connectionString: CONNECTION_STRING,
