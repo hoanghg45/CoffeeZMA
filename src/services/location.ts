@@ -41,10 +41,11 @@ export const getCurrentLocation = async (): Promise<LocationCoordinates | null> 
 
     // Case 2: Token-based flow (older API behavior)
     if (locationResult.token) {
+      console.log("📍 Location token received. Attempting conversion...", { token: locationResult.token });
       return await convertLocationToken(locationResult.token);
     }
 
-    console.warn("Location data not available in expected format");
+    console.warn("Location data not available in expected format:", locationResult);
     return null;
   } catch (error) {
     console.error("Error getting location:", error);
@@ -67,68 +68,56 @@ const convertLocationToken = async (token: string): Promise<LocationCoordinates 
       return null;
     }
 
-    // Call Zalo Open API directly from the mini app
-    // Note: This requires the secret_key, which should be stored securely
-    // If Zalo Platform provides environment variables or secure storage, use that
-    const secretKey = import.meta.env.VITE_ZALO_SECRET_KEY;
+    // Get backend URL from environment (Vercel serverless function)
+    const backendUrl = import.meta.env.VITE_API_URL;
 
-    if (!secretKey) {
-      console.warn(
-        "Zalo secret key not found. " +
-        "Add VITE_ZALO_SECRET_KEY to your environment variables. " +
-        "You can find it at: https://developers.zalo.me/ → Quản lý ứng dụng → Your App"
+    if (!backendUrl) {
+      console.error(
+        "❌ VITE_API_URL not configured. " +
+        "Please set VITE_API_URL in your .env file to your Vercel deployment URL. " +
+        "Example: VITE_API_URL=https://your-app.vercel.app"
       );
       return null;
     }
 
-    // Call Zalo Open API to convert token to coordinates
-    const params = new URLSearchParams({
-      access_token: accessToken,
-      code: token,
-      secret_key: secretKey,
+    // Call Vercel serverless function to convert token
+    // This avoids CORS issues and keeps secret key secure on the server
+    const response = await fetch(`${backendUrl}/api/location/convert`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token,
+        accessToken,
+      }),
     });
 
-    const response = await fetch(
-      `https://openapi.zalo.me/v2.0/location/getlocation?${params.toString()}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Failed to convert location token via Zalo Open API:", errorText);
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = { error: await response.text() };
+      }
+      console.error("❌ Location conversion failed:", errorData);
       return null;
     }
 
     const data = await response.json();
 
-    // Zalo API response structure:
-    // {
-    //   "data": {
-    //     "provider": "gps",
-    //     "latitude": "10.758341",
-    //     "longitude": "106.745863",
-    //     "timestamp": "1666249171003"
-    //   },
-    //   "error": 0,
-    //   "message": "Success"
-    // }
-
-    if (data.error === 0 && data.data?.latitude && data.data?.longitude) {
+    if (data.latitude && data.longitude) {
       return {
-        latitude: parseFloat(data.data.latitude),
-        longitude: parseFloat(data.data.longitude),
+        latitude: parseFloat(data.latitude),
+        longitude: parseFloat(data.longitude),
       };
     }
 
-    console.warn("Invalid location data from Zalo Open API:", data);
+    console.warn("Invalid location data received from server:", data);
     return null;
   } catch (error) {
-    console.error("Error converting location token:", error);
+    console.error("❌ Location Conversion Failed:", error);
+    console.info("💡 Make sure VITE_API_URL is set to your Vercel deployment URL");
     return null;
   }
 };

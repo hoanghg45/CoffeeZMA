@@ -1,0 +1,19 @@
+{
+  "name": "zalo-api-proxy",
+  "version": "1.0.0",
+  "description": "Standalone serverless proxy for Zalo Mini App token conversion",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
+

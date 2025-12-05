@@ -1,5 +1,5 @@
 import { atom, selector, selectorFamily } from "recoil";
-import { getPhoneNumber, getUserInfo } from "zmp-sdk";
+import { getCurrentPhoneNumber, getCurrentUserInfo } from "services/user-info";
 import { getCurrentLocation } from "services/location";
 import logo from "static/logo.png";
 import { Product } from "types/product";
@@ -19,7 +19,12 @@ import { getBranches } from "services/branch";
 export const userState = selector({
   key: "user",
   get: async () => {
-    const { userInfo } = await getUserInfo({ autoRequestPermission: true });
+    const userInfo = await getCurrentUserInfo({ autoRequestPermission: true });
+    
+    if (!userInfo) {
+      throw new Error("Failed to get user info");
+    }
+    
     // Ensure user exists in DB
     await ensureUserExists({
       id: userInfo.id,
@@ -307,23 +312,17 @@ export const phoneState = selector<string | boolean>({
     const requested = get(requestPhoneTriesState);
     if (requested) {
       try {
-        const { number, token } = await getPhoneNumber({ fail: console.warn });
-        if (number) {
-          return number;
+        // Use the new service that handles token conversion
+        const phoneNumber = await getCurrentPhoneNumber();
+        
+        if (phoneNumber) {
+          return phoneNumber;
         }
-        console.warn(
-          "Sử dụng token này để truy xuất số điện thoại của người dùng",
-          token
-        );
-        console.warn(
-          "Chi tiết tham khảo: ",
-          "https://mini.zalo.me/blog/thong-bao-thay-doi-luong-truy-xuat-thong-tin-nguoi-dung-tren-zalo-mini-app"
-        );
-        console.warn("Giả lập số điện thoại mặc định: 0337076898");
-        return "0337076898";
+        
+        console.warn("Phone number not available. Make sure VITE_ZALO_SECRET_KEY is set in environment variables.");
+        return false;
       } catch (error) {
-        // Xử lý exception
-        console.error(error);
+        console.error("Error getting phone number:", error);
         return false;
       }
     }
