@@ -1,5 +1,6 @@
 import { atom, selector, selectorFamily } from "recoil";
-import { getLocation, getPhoneNumber, getUserInfo } from "zmp-sdk";
+import { getPhoneNumber, getUserInfo } from "zmp-sdk";
+import { getCurrentLocation } from "services/location";
 import logo from "static/logo.png";
 import { Product } from "types/product";
 import { Cart } from "types/cart";
@@ -284,28 +285,18 @@ export const locationState = selector<
     // Always attempt to get location when this selector is accessed (lazy)
     // The requested dependency ensures we can trigger a retry
 
-    const { latitude, longitude, token } = await getLocation({
-      fail: console.warn,
-    });
-    if (latitude && longitude) {
-      return { latitude, longitude };
-    }
-    if (token) {
-      console.warn(
-        "Sử dụng token này để truy xuất vị trí chính xác của người dùng",
-        token
-      );
-      console.warn(
-        "Chi tiết tham khảo: ",
-        "https://mini.zalo.me/blog/thong-bao-thay-doi-luong-truy-xuat-thong-tin-nguoi-dung-tren-zalo-mini-app"
-      );
-      console.warn("Giả lập vị trí mặc định: VNG Campus");
+    // Use the new location service that handles Zalo's token-based flow
+    const coordinates = await getCurrentLocation();
+    
+    if (coordinates) {
       return {
-        latitude: "10.7287",
-        longitude: "106.7317",
+        latitude: coordinates.latitude.toString(),
+        longitude: coordinates.longitude.toString(),
       };
     }
 
+    // Fallback: Return false if location is not available
+    console.warn("Location not available. Make sure backend /api/location/convert endpoint is implemented.");
     return false;
   },
 });

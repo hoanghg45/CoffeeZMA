@@ -5,7 +5,7 @@ import { Sheet } from "./fullscreen-sheet";
 import { createPortal } from "react-dom";
 import { selectedAddressState, userAddressesState, userState, addressPickerVisibleState, addressEditingState } from "../state";
 import { saveUserAddress, deleteUserAddress, UserAddress } from "../services/user";
-import { getLocation } from "zmp-sdk";
+import { getCurrentLocation } from "../services/location";
 
 export const AddressPicker: FC = () => {
   const [visible, setVisible] = useRecoilState(addressPickerVisibleState);
@@ -97,19 +97,18 @@ export const AddressPicker: FC = () => {
 
   const handleGetCurrentLocation = async () => {
     try {
-      const { latitude, longitude } = await getLocation({
-        fail: console.warn
-      });
+      // Get location coordinates using Zalo's token-based flow
+      const coordinates = await getCurrentLocation();
 
-      if (!latitude || !longitude) {
-        console.warn("Location not available");
+      if (!coordinates) {
+        console.warn("Location not available. Please ensure location permission is granted.");
+        // Optionally show a toast notification to user
         return;
       }
 
-      const lat = parseFloat(latitude);
-      const lng = parseFloat(longitude);
+      const { latitude, longitude } = coordinates;
 
-      if (isNaN(lat) || isNaN(lng)) {
+      if (isNaN(latitude) || isNaN(longitude)) {
         console.warn("Invalid coordinates");
         return;
       }
@@ -117,8 +116,8 @@ export const AddressPicker: FC = () => {
       // Set coordinates - address will need to be filled manually or via reverse geocoding API
       setForm(prev => ({
         ...prev,
-        lat,
-        long: lng,
+        lat: latitude,
+        long: longitude,
         // Don't set address to coordinates - let user enter proper address
         // In production, use reverse geocoding API here
       }));
