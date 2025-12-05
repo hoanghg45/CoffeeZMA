@@ -13,7 +13,7 @@ interface AhaMoveItem {
   _id: string;
   name: string;
   price: number;
-  num: number;a
+  num: number;
 }
 
 export interface EstimateFeeParams {
@@ -38,7 +38,7 @@ const AHAMOVE_API_URL = "https://partner-apistg.ahamove.com/v3";
 export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFeeResponse> => {
   try {
     const token = import.meta.env.VITE_AHAMOVE_TOKEN;
-    
+
     if (!token) {
       console.warn("AhaMove token is missing!");
       return {
@@ -84,7 +84,7 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
     }
 
     const data = await response.json();
-    
+
     // Handle AhaMove v3 response structure
     // The response may have different structure, adjust based on actual API response
     return {

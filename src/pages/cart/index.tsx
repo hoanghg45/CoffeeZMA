@@ -6,9 +6,13 @@ import { CartPreview } from "./preview";
 import { TermsAndPolicies } from "./term-and-policies";
 import { Delivery } from "./delivery";
 import { useVirtualKeyboardVisible } from "hooks";
+import { useRecoilValue } from "recoil";
+import { addressPickerVisibleState, addressEditingState } from "state";
 
 const CartPage: FC = () => {
   const keyboardVisible = useVirtualKeyboardVisible();
+  const addressPickerVisible = useRecoilValue(addressPickerVisibleState);
+  const addressEditing = useRecoilValue(addressEditingState);
 
   return (
     <Page className="flex flex-col bg-gray-100 min-h-screen">
@@ -18,7 +22,7 @@ const CartPage: FC = () => {
         <Delivery />
         <TermsAndPolicies />
       </div>
-      {!keyboardVisible && <CartPreview />}
+      {!keyboardVisible && !addressPickerVisible && !addressEditing && <CartPreview />}
     </Page>
   );
 };

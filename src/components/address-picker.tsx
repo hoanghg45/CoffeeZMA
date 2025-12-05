@@ -3,16 +3,16 @@ import { useRecoilState, useRecoilValue, useRecoilRefresher_UNSTABLE } from "rec
 import { Box, Button, Icon, Input, Text } from "zmp-ui";
 import { Sheet } from "./fullscreen-sheet";
 import { createPortal } from "react-dom";
-import { selectedAddressState, userAddressesState, userState } from "../state";
+import { selectedAddressState, userAddressesState, userState, addressPickerVisibleState, addressEditingState } from "../state";
 import { saveUserAddress, deleteUserAddress, UserAddress } from "../services/user";
 import { getLocation } from "zmp-sdk";
 
 export const AddressPicker: FC = () => {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useRecoilState(addressPickerVisibleState);
   const addresses = useRecoilValue(userAddressesState); // Read-only
   const refreshAddresses = useRecoilRefresher_UNSTABLE(userAddressesState);
   const [selectedAddress, setSelectedAddress] = useRecoilState(selectedAddressState);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useRecoilState(addressEditingState);
   const [editingAddress, setEditingAddress] = useState<UserAddress | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const user = useRecoilValue(userState);
@@ -33,7 +33,7 @@ export const AddressPicker: FC = () => {
 
   const handleSave = async () => {
     if (!form.name || !form.address || !form.phone) return;
-    
+
     const savedAddress = await saveUserAddress({
       id: editingAddress?.id,
       userId: user.id,
@@ -50,14 +50,14 @@ export const AddressPicker: FC = () => {
       setEditingAddress(null);
       setForm({ name: "", address: "", phone: "" });
       refreshAddresses();
-      
+
       // Update selected address if it was edited or if it's new
       if (editingAddress?.id === selectedAddress?.id || !selectedAddress) {
         setSelectedAddress(savedAddress);
       }
-      
+
       if (!editingAddress) {
-      setVisible(false);
+        setVisible(false);
       }
     }
   };
@@ -83,7 +83,7 @@ export const AddressPicker: FC = () => {
       if (selectedAddress?.id === addressId) {
         setSelectedAddress(null);
       }
-      
+
       refreshAddresses();
       setDeleteConfirmId(null);
     }
@@ -100,20 +100,20 @@ export const AddressPicker: FC = () => {
       const { latitude, longitude } = await getLocation({
         fail: console.warn
       });
-      
+
       if (!latitude || !longitude) {
         console.warn("Location not available");
         return;
       }
-      
+
       const lat = parseFloat(latitude);
       const lng = parseFloat(longitude);
-      
+
       if (isNaN(lat) || isNaN(lng)) {
         console.warn("Invalid coordinates");
         return;
       }
-      
+
       // Set coordinates - address will need to be filled manually or via reverse geocoding API
       setForm(prev => ({
         ...prev,
@@ -140,7 +140,7 @@ export const AddressPicker: FC = () => {
           <Text.Title size="small" className="font-bold truncate">{selectedAddress?.name || "Chọn địa chỉ"}</Text.Title>
           <Text size="xSmall" className="text-gray-500 line-clamp-2 break-words">
             {selectedAddress?.address || "Vui lòng chọn địa chỉ giao hàng"}
-          </Text> 
+          </Text>
         </Box>
         <Icon icon="zi-chevron-right" size={20} className="text-gray-400 ml-2" />
       </Box>
@@ -155,14 +155,14 @@ export const AddressPicker: FC = () => {
         <Box className="p-4 space-y-4 pb-8">
           <Box className="flex justify-between items-center">
             <Text.Title>Sổ địa chỉ</Text.Title>
-            <Button 
-              size="small" 
+            <Button
+              size="small"
               variant="primary"
-              icon={<Icon icon="zi-plus" />} 
-              onClick={() => { 
-                setIsEditing(true); 
+              icon={<Icon icon="zi-plus" />}
+              onClick={() => {
+                setIsEditing(true);
                 setEditingAddress(null);
-                setForm({ name: "", address: "", phone: "" }); 
+                setForm({ name: "", address: "", phone: "" });
               }}
               className="rounded-lg"
             >
@@ -178,31 +178,29 @@ export const AddressPicker: FC = () => {
               </Box>
             ) : (
               addresses.map((addr) => (
-              <Box
-                key={addr.id}
-                  className={`relative p-4 rounded-xl border transition-all ${
-                    selectedAddress?.id === addr.id 
-                      ? 'border-primary bg-primary/5 shadow-sm' 
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
+                <Box
+                  key={addr.id}
+                  className={`relative p-4 rounded-xl border transition-all ${selectedAddress?.id === addr.id
+                    ? 'border-primary bg-primary/5 shadow-sm'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
                 >
                   <Box className="flex items-start gap-3">
-                    <Box 
+                    <Box
                       className="flex items-start gap-3 flex-1 min-w-0 cursor-pointer"
-                onClick={() => {
-                  setSelectedAddress(addr);
-                  setVisible(false);
-                }}
-              >
-                      <Box className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        selectedAddress?.id === addr.id 
-                          ? 'bg-primary' 
-                          : 'bg-gray-100'
-                      }`}>
-                        <Icon 
-                          icon="zi-location" 
-                          className={selectedAddress?.id === addr.id ? 'text-white' : 'text-gray-600'} 
-                          size={20} 
+                      onClick={() => {
+                        setSelectedAddress(addr);
+                        setVisible(false);
+                      }}
+                    >
+                      <Box className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${selectedAddress?.id === addr.id
+                        ? 'bg-primary'
+                        : 'bg-gray-100'
+                        }`}>
+                        <Icon
+                          icon="zi-location"
+                          className={selectedAddress?.id === addr.id ? 'text-white' : 'text-gray-600'}
+                          size={20}
                         />
                       </Box>
                       <Box className="flex-1 min-w-0">
@@ -218,13 +216,13 @@ export const AddressPicker: FC = () => {
                         <Text size="xSmall" className="text-gray-500">{addr.phone}</Text>
                       </Box>
                     </Box>
-                    
+
                     {/* Action Buttons - Compact vertical stack on the right */}
                     <Box className="flex flex-col gap-1.5 flex-shrink-0">
                       <Button
                         variant="tertiary"
                         size="small"
-                        className="w-9 h-9 p-0 rounded-lg bg-green-50 hover:bg-green-100 active:bg-green-200"
+                        className="w-9 h-9 p-0 rounded-full bg-green-50 hover:bg-green-100 active:bg-green-200"
                         onClick={(e) => handleEdit(addr, e)}
                       >
                         <Icon icon="zi-edit" size={18} className="text-green-600" />
@@ -232,7 +230,7 @@ export const AddressPicker: FC = () => {
                       <Button
                         variant="tertiary"
                         size="small"
-                        className="w-9 h-9 p-0 rounded-lg bg-red-50 hover:bg-red-100 active:bg-red-200"
+                        className="w-9 h-9 p-0 rounded-full bg-red-50 hover:bg-red-100 active:bg-red-200"
                         onClick={(e) => {
                           e.stopPropagation();
                           setDeleteConfirmId(addr.id);
@@ -289,7 +287,7 @@ export const AddressPicker: FC = () => {
                       <Text size="xSmall" className="text-gray-500 mb-0.5">Tên gợi nhớ</Text>
                       <Input
                         value={form.name || ""}
-                        onChange={(e) => setForm({...form, name: e.target.value})}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
                         placeholder="Ví dụ: Nhà, Công ty"
                         className="border-none px-0 bg-transparent text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none p-0 h-auto"
                       />
@@ -315,7 +313,7 @@ export const AddressPicker: FC = () => {
                       </Box>
                       <Input
                         value={form.address || ""}
-                        onChange={(e) => setForm({...form, address: e.target.value})}
+                        onChange={(e) => setForm({ ...form, address: e.target.value })}
                         placeholder="Nhập địa chỉ chi tiết"
                         className="border-none px-0 bg-transparent text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none p-0 h-auto"
                       />
@@ -333,7 +331,7 @@ export const AddressPicker: FC = () => {
                       <Text size="xSmall" className="text-gray-500 mb-0.5">Số điện thoại nhận hàng</Text>
                       <Input
                         value={form.phone || ""}
-                        onChange={(e) => setForm({...form, phone: e.target.value})}
+                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
                         placeholder="Nhập số điện thoại"
                         className="border-none px-0 bg-transparent text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none p-0 h-auto"
                       />
@@ -389,18 +387,18 @@ export const AddressPicker: FC = () => {
               Bạn có chắc chắn muốn xóa địa chỉ này? Hành động này không thể hoàn tác.
             </Text>
           </Box>
-          
+
           <Box className="flex gap-3 pt-2">
-            <Button 
-              variant="secondary" 
-              fullWidth 
+            <Button
+              variant="secondary"
+              fullWidth
               onClick={() => setDeleteConfirmId(null)}
               className="rounded-lg h-12"
             >
               Hủy
             </Button>
-            <Button 
-              fullWidth 
+            <Button
+              fullWidth
               onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}
               className="rounded-lg h-12 font-semibold bg-error text-white"
             >

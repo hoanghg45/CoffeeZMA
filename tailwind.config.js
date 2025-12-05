@@ -32,7 +32,7 @@ module.exports = {
         outline: "var(--coffee-outline)",
         outlineVariant: "var(--coffee-outline-variant)",
         divider: "var(--coffee-outline-variant)",
-        green: "#288F4E",
+        "custom-green": "#288F4E",
         skeleton: "rgba(0, 0, 0, 0.1)",
       },
     },

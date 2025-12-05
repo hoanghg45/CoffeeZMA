@@ -47,7 +47,7 @@ export const productsState = selector<Product[]>({
     return products.map((product) => {
       // Access the variantId that comes from the DB service but isn't on the official Product type
       const productWithIds = product as unknown as { variantId?: string[] };
-      
+
       return {
         ...product,
         variants: variants.filter((variant) =>
@@ -137,12 +137,12 @@ export const resultState = selector<Product[]>({
   get: async ({ get }) => {
     const keyword = get(keywordState);
     const products = get(productsState);
-    
+
     // Show all products when keyword is empty (initial state)
     if (!keyword.trim()) {
       return products;
     }
-    
+
     await wait(500);
     return products.filter((product) =>
       product.name.trim().toLowerCase().includes(keyword.trim().toLowerCase())
@@ -249,12 +249,12 @@ export const selectedStoreState = selector<Store | null>({
   get: ({ get }) => {
     const storeId = get(selectedStoreIdState);
     const stores = get(storesState);
-    
+
     if (storeId !== null) {
       const store = stores.find(s => s.id === storeId);
       if (store) return store;
     }
-    
+
     // Fallback to first store if no selection
     return stores.length > 0 ? stores[0] : null;
   },
@@ -283,7 +283,7 @@ export const locationState = selector<
     const requested = get(requestLocationTriesState);
     // Always attempt to get location when this selector is accessed (lazy)
     // The requested dependency ensures we can trigger a retry
-    
+
     const { latitude, longitude, token } = await getLocation({
       fail: console.warn,
     });
@@ -291,21 +291,21 @@ export const locationState = selector<
       return { latitude, longitude };
     }
     if (token) {
-        console.warn(
-          "Sử dụng token này để truy xuất vị trí chính xác của người dùng",
-          token
-        );
-        console.warn(
-          "Chi tiết tham khảo: ",
-          "https://mini.zalo.me/blog/thong-bao-thay-doi-luong-truy-xuat-thong-tin-nguoi-dung-tren-zalo-mini-app"
-        );
-        console.warn("Giả lập vị trí mặc định: VNG Campus");
-        return {
+      console.warn(
+        "Sử dụng token này để truy xuất vị trí chính xác của người dùng",
+        token
+      );
+      console.warn(
+        "Chi tiết tham khảo: ",
+        "https://mini.zalo.me/blog/thong-bao-thay-doi-luong-truy-xuat-thong-tin-nguoi-dung-tren-zalo-mini-app"
+      );
+      console.warn("Giả lập vị trí mặc định: VNG Campus");
+      return {
         latitude: "10.7287",
         longitude: "106.7317",
       };
     }
-    
+
     return false;
   },
 });
@@ -378,6 +378,16 @@ export const selectedAddressState = atom<UserAddress | null>({
   default: null,
 });
 
+export const addressPickerVisibleState = atom({
+  key: "addressPickerVisible",
+  default: false,
+});
+
+export const addressEditingState = atom({
+  key: "addressEditing",
+  default: false,
+});
+
 export const userAddressesState = selector<UserAddress[]>({
   key: "userAddresses",
   get: async ({ get }) => {
@@ -402,16 +412,16 @@ export const calculatedDeliveryFeeState = selector({
     // Include name and mobile for both pickup and delivery points
     const fee = await estimateFee({
       path: [
-        { 
-          lat: store.lat, 
-          lng: store.long, 
+        {
+          lat: store.lat,
+          lng: store.long,
           address: store.address,
           name: store.name,
           mobile: store.phone || "02873001234" // Fallback phone
         },
-        { 
-          lat: address.lat, 
-          lng: address.long, 
+        {
+          lat: address.lat,
+          lng: address.long,
           address: address.address,
           name: address.name || user.name,
           mobile: address.phone
