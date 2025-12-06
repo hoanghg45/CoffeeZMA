@@ -19,6 +19,7 @@ export default () => {
         "types": path.resolve(process.cwd(), "src/types"),
         "static": path.resolve(process.cwd(), "src/static"),
         "hooks": path.resolve(process.cwd(), "src/hooks"),
+        "services": path.resolve(process.cwd(), "src/services"),
       },
     },
   });

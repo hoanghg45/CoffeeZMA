@@ -1,7 +1,9 @@
 {
   "json.schemas": [
     {
-      "fileMatch": ["app-config.json"],
+      "fileMatch": [
+        "app-config.json"
+      ],
       "schema": {
         "type": "object",
         "properties": {
@@ -11,7 +13,9 @@
             "properties": {
               "name": {
                 "type": "string",
-                "enum": ["zaui-coffee"],
+                "enum": [
+                  "zaui-coffee"
+                ],
                 "description": "Tên template. Bắt buộc phải mang giá trị zaui-coffee"
               },
               "headerLogo": {
@@ -34,7 +38,9 @@
                 "default": false
               }
             },
-            "required": ["name"]
+            "required": [
+              "name"
+            ]
           }
         }
       }

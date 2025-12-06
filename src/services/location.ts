@@ -30,7 +30,7 @@ export const getCurrentLocation = async (): Promise<LocationCoordinates | null> 
     if (locationResult.latitude && locationResult.longitude) {
       const lat = parseFloat(locationResult.latitude);
       const lng = parseFloat(locationResult.longitude);
-      
+
       if (!isNaN(lat) && !isNaN(lng)) {
         return {
           latitude: lat,
@@ -68,29 +68,47 @@ const convertLocationToken = async (token: string): Promise<LocationCoordinates 
       return null;
     }
 
-    // Get backend URL from environment (Vercel serverless function)
+    // Get backend URL from environment (Vercel serverless function or N8N Webhook)
     const backendUrl = import.meta.env.VITE_API_URL;
+    const n8nWebhook = import.meta.env.VITE_N8N_WEBHOOK;
 
-    if (!backendUrl) {
+    if (!backendUrl && !n8nWebhook) {
       console.error(
-        "❌ VITE_API_URL not configured. " +
-        "Please set VITE_API_URL in your .env file to your Vercel deployment URL. " +
-        "Example: VITE_API_URL=https://your-app.vercel.app"
+        "❌ No API URL configured. " +
+        "Please set VITE_API_URL or VITE_N8N_WEBHOOK in your .env file."
       );
       return null;
     }
 
-    // Call Vercel serverless function to convert token
-    // This avoids CORS issues and keeps secret key secure on the server
-    const response = await fetch(`${backendUrl}/api/location/convert`, {
-      method: "POST",
+    let fetchUrl = "";
+    let method = "POST";
+    let body = {};
+
+    if (n8nWebhook) {
+      // Use N8N Webhook directly
+      fetchUrl = n8nWebhook;
+      // N8N usually expects the data directly in the body
+      body = {
+        token,
+        accessToken,
+      };
+      console.log("📍 Using N8N Webhook for location conversion");
+    } else {
+      // Use Vercel Proxy
+      fetchUrl = `${backendUrl}/api/location/convert`;
+      body = {
+        token,
+        accessToken,
+      };
+    }
+
+    // Call server to convert token
+    const response = await fetch(fetchUrl, {
+      method: method,
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        token,
-        accessToken,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -104,16 +122,44 @@ const convertLocationToken = async (token: string): Promise<LocationCoordinates 
       return null;
     }
 
-    const data = await response.json();
+    const responseData = await response.json();
+    console.log("📍 Raw location response:", responseData);
 
-    if (data.latitude && data.longitude) {
+    let lat = 0;
+    let lng = 0;
+
+    // Handle N8N array format: [{"data": { "latitude": "...", "longitude": "..." }}]
+    if (Array.isArray(responseData) && responseData.length > 0) {
+      const item = responseData[0];
+      if (item.data && item.data.latitude && item.data.longitude) {
+        lat = parseFloat(item.data.latitude);
+        lng = parseFloat(item.data.longitude);
+      } else if (item.latitude && item.longitude) {
+        // Case: [{"latitude": "...", "longitude": "..."}]
+        lat = parseFloat(item.latitude);
+        lng = parseFloat(item.longitude);
+      }
+    }
+    // Handle N8N object format with data wrapper: {"data": { "latitude": "...", "longitude": "..." }}
+    else if (responseData.data && responseData.data.latitude && responseData.data.longitude) {
+      lat = parseFloat(responseData.data.latitude);
+      lng = parseFloat(responseData.data.longitude);
+    }
+    // Handle flat format: {"latitude": "...", "longitude": "..."}
+    else if (responseData.latitude && responseData.longitude) {
+      lat = parseFloat(responseData.latitude);
+      lng = parseFloat(responseData.longitude);
+    }
+
+    if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+      console.log(`✅ Parsed location: ${lat}, ${lng}`);
       return {
-        latitude: parseFloat(data.latitude),
-        longitude: parseFloat(data.longitude),
+        latitude: lat,
+        longitude: lng,
       };
     }
 
-    console.warn("Invalid location data received from server:", data);
+    console.warn("Invalid location data received from server:", responseData);
     return null;
   } catch (error) {
     console.error("❌ Location Conversion Failed:", error);

@@ -20,11 +20,11 @@ export const userState = selector({
   key: "user",
   get: async () => {
     const userInfo = await getCurrentUserInfo({ autoRequestPermission: true });
-    
+
     if (!userInfo) {
       throw new Error("Failed to get user info");
     }
-    
+
     // Ensure user exists in DB
     await ensureUserExists({
       id: userInfo.id,
@@ -292,7 +292,7 @@ export const locationState = selector<
 
     // Use the new location service that handles Zalo's token-based flow
     const coordinates = await getCurrentLocation();
-    
+
     if (coordinates) {
       return {
         latitude: coordinates.latitude.toString(),
@@ -314,11 +314,11 @@ export const phoneState = selector<string | boolean>({
       try {
         // Use the new service that handles token conversion
         const phoneNumber = await getCurrentPhoneNumber();
-        
+
         if (phoneNumber) {
           return phoneNumber;
         }
-        
+
         console.warn("Phone number not available. Make sure VITE_ZALO_SECRET_KEY is set in environment variables.");
         return false;
       } catch (error) {
@@ -393,8 +393,29 @@ export const calculatedDeliveryFeeState = selector({
     const store = get(selectedStoreState);
     const cart = get(cartState);
     const user = get(userState);
+    const location = get(locationState);
 
-    if (!address || !store || cart.length === 0) {
+    let destLat = 0;
+    let destLng = 0;
+    let destAddress = "";
+    let destName = "";
+    let destPhone = "";
+
+    if (address) {
+      destLat = address.lat;
+      destLng = address.long;
+      destAddress = address.address;
+      destName = address.name || user.name;
+      destPhone = address.phone;
+    } else if (location) {
+      destLat = parseFloat(location.latitude);
+      destLng = parseFloat(location.longitude);
+      destAddress = "Current Location";
+      destName = user.name;
+      destPhone = ""; // Optional or use user's phone if available
+    }
+
+    if ((!destLat || !destLng) || !store || cart.length === 0) {
       return 0;
     }
 
@@ -410,11 +431,11 @@ export const calculatedDeliveryFeeState = selector({
           mobile: store.phone || "02873001234" // Fallback phone
         },
         {
-          lat: address.lat,
-          lng: address.long,
-          address: address.address,
-          name: address.name || user.name,
-          mobile: address.phone
+          lat: destLat,
+          lng: destLng,
+          address: destAddress,
+          name: destName,
+          mobile: destPhone
         }
       ],
       items: cart.map(item => ({

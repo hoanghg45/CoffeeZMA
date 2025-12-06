@@ -52,7 +52,9 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
     // AhaMove v3 API structure
     const requestBody: any = {
       path: params.path,
-      services: ["SGN-BIKE"], // Service ID array
+      services: [{
+        "_id": "SGN-BIKE"
+      }], // Service ID array
       items: params.items,
       payment_method: params.payment_method || "CASH" // Default to cash on delivery
     };
@@ -85,8 +87,22 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
 
     const data = await response.json();
 
-    // Handle AhaMove v3 response structure
-    // The response may have different structure, adjust based on actual API response
+    // Handle AhaMove v3 response structure (Array format)
+    // Response: [{"service_id": "...", "data": { "total_price": 46000, ... }, "error": null}]
+
+    if (Array.isArray(data) && data.length > 0) {
+      const item = data[0]; // Assuming first service/item
+      if (item.data) {
+        return {
+          total_pay: item.data.total_price || item.data.total_pay || 30000,
+          distance: item.data.distance || 0,
+          duration: item.data.duration || 0,
+          currency: item.data.currency || "VND"
+        };
+      }
+    }
+
+    // Fallback for object structure (if API changes again)
     return {
       total_pay: data.total_pay || data.fee || 30000,
       distance: data.distance || 0,
