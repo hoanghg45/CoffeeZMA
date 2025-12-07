@@ -15,12 +15,12 @@ This is a **separate, standalone service** for converting Zalo Mini App tokens t
 zalo-api-proxy/
 ├── api/
 │   ├── location/
-│   │   └── convert.ts      # Location token → coordinates
+│   │   └── convert.js       # Location token → coordinates
 │   └── user/
-│       └── getphone.ts      # Phone token → phone number
+│       └── getphone.js      # Phone token → phone number
 ├── vercel.json              # Vercel configuration
 ├── package.json             # Minimal dependencies
-└── README.md               # This file
+└── README.md                # This file
 ```
 
 ## Quick Start
@@ -106,18 +106,18 @@ Converts phone number token to phone number.
 
 ## Testing
 
-Test the endpoints:
+Test the endpoints with curl:
 
 ```bash
 # Test location conversion
-curl -X POST https://your-proxy-name.vercel.app/api/location/convert \
+curl -X POST https://zalo-api-proxy.vercel.app/api/location/convert \
   -H "Content-Type: application/json" \
-  -d '{"token":"test","accessToken":"test"}'
+  -d '{"token":"YOUR_TOKEN","accessToken":"YOUR_ACCESS_TOKEN"}'
 
 # Test phone conversion
-curl -X POST https://your-proxy-name.vercel.app/api/user/getphone \
+curl -X POST https://zalo-api-proxy.vercel.app/api/user/getphone \
   -H "Content-Type: application/json" \
-  -d '{"token":"test","accessToken":"test"}'
+  -d '{"token":"YOUR_TOKEN","accessToken":"YOUR_ACCESS_TOKEN"}'
 ```
 
 ## Security
