@@ -102,8 +102,17 @@ export const totalQuantityState = selector({
   },
 });
 
-export const totalPriceState = selector({
-  key: "totalPrice",
+// Rename the original totalPriceState logic to requestTotalAmountState (or subtotal) for clarity if needed, 
+// but for now let's keep totalPriceState as the FINAL price to minimize refactoring elsewhere.
+// Wait! totalPriceState is used in many places. "subtotal" is what it was.
+// Cleanest approach: 
+// 1. Rename existing `totalPriceState` selector to `requestTotalAmountState` (internal use) or just use it as subtotal.
+// 2. BUT `totalPriceState` name implies "Total". 
+// Let's make `totalPriceState` depend on `calculatedDeliveryFeeState`.
+
+// Calculating the subtotal of items
+export const subtotalState = selector({
+  key: "subtotal",
   get: ({ get }) => {
     const cart = get(cartState);
     return cart.reduce(
@@ -111,6 +120,16 @@ export const totalPriceState = selector({
         total + item.quantity * calcFinalPrice(item.product, item.options),
       0
     );
+  },
+});
+
+// Calculate final total (Subtotal + Shipping)
+export const totalPriceState = selector({
+  key: "totalPrice",
+  get: ({ get }) => {
+    const subtotal = get(subtotalState);
+    const deliveryFee = get(calculatedDeliveryFeeState);
+    return subtotal + deliveryFee;
   },
 });
 

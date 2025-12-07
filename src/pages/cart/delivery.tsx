@@ -4,8 +4,8 @@ import { Box, Icon, Text } from "zmp-ui";
 import { RequestPersonPickerPhone } from "./person-picker";
 import { TimePicker } from "./time-picker";
 import { useRecoilState, useRecoilValueLoadable, useSetRecoilState } from "recoil";
-import { 
-  orderNoteState, 
+import {
+  orderNoteState,
   calculatedDeliveryFeeState,
   selectedStoreState,
   phoneState,
@@ -16,7 +16,7 @@ import { BranchPicker } from "components/branch-picker";
 
 export const Delivery: FC = () => {
   const [note, setNote] = useRecoilState(orderNoteState);
-  
+
   // Use Loadables to prevent component suspension at top level
   const deliveryFeeLoadable = useRecoilValueLoadable(calculatedDeliveryFeeState);
   const selectedStoreLoadable = useRecoilValueLoadable(selectedStoreState);
@@ -25,9 +25,9 @@ export const Delivery: FC = () => {
 
   const deliveryFee = deliveryFeeLoadable.state === 'hasValue' ? deliveryFeeLoadable.contents : 0;
   const isFeeLoading = deliveryFeeLoadable.state === 'loading';
-  
+
   const selectedStore = selectedStoreLoadable.state === 'hasValue' ? selectedStoreLoadable.contents : null;
-  
+
   // Handle click for phone request - only clickable when phone is not available
   const handlePersonPickerClick = () => {
     if (phoneLoadable.state !== 'hasValue' || !phoneLoadable.contents) {
@@ -57,15 +57,6 @@ export const Delivery: FC = () => {
           </Box>
         </Box>
 
-        {/* Fee Display */}
-        <Box className="flex justify-between items-center  p-3">
-          <Box className="flex items-center space-x-2">
-            <Text size="small" className="font-medium">Phí giao hàng</Text>
-          </Box>
-          <Text size="small" className="font-bold">
-            {isFeeLoading ? "Đang tính..." : `${deliveryFee.toLocaleString()}đ`}
-          </Text>
-        </Box>
       </Box>
 
       {/* Time & Details - Common for both */}
@@ -90,8 +81,8 @@ export const Delivery: FC = () => {
           <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
             <Icon icon="zi-user" className="text-yellow-600" size={20} />
           </Box>
-          <Box 
-            flex 
+          <Box
+            flex
             className="flex-1 items-center justify-between"
             onClick={handlePersonPickerClick}
             style={{ cursor: phoneLoadable.state !== 'hasValue' || !phoneLoadable.contents ? 'pointer' : 'default' }}
