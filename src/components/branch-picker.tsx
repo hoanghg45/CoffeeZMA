@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRecoilState, useRecoilValue, useRecoilValueLoadable } from "recoil";
 import { Box, Icon, Sheet, Text } from "zmp-ui";
 import { selectedStoreIdState, storesState, locationState } from "../state";
@@ -7,12 +8,17 @@ import { displayDistance, calculateDistance } from "../utils/location";
 
 export const BranchPicker: FC = () => {
   const [visible, setVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const storesLoadable = useRecoilValueLoadable(storesState);
   const [selectedStoreId, setSelectedStoreId] = useRecoilState(selectedStoreIdState);
   const location = useRecoilValue(locationState);
 
   const stores = storesLoadable.state === 'hasValue' ? storesLoadable.contents : [];
-  
+
   // Get selected store
   const selectedStore = stores.find(s => s.id === selectedStoreId) || stores[0] || null;
 
@@ -69,61 +75,64 @@ export const BranchPicker: FC = () => {
         <Icon icon="zi-chevron-right" size={20} className="text-gray-400 ml-2" />
       </Box>
 
-      <Sheet
-        visible={visible}
-        onClose={() => setVisible(false)}
-        mask
-        swipeToClose
-        height="auto"
-      >
-        <Box className="p-4 space-y-4 pb-8">
-          <Text.Title>Chọn cửa hàng</Text.Title>
+      {mounted && createPortal(
+        <Sheet
+          visible={visible}
+          onClose={() => setVisible(false)}
+          mask
+          swipeToClose
+          height="auto"
+          style={{ zIndex: 12000 }}
+        >
+          <Box className="p-4 space-y-4 pb-8">
+            <Text.Title>Chọn cửa hàng</Text.Title>
 
-          <Box className="space-y-2 max-h-[60vh] overflow-y-auto">
-            {sortedStores.map((store) => {
-              const isSelected = store.id === selectedStoreId;
-              const distance = store.distance;
-              
-              return (
-                <Box
-                  key={store.id}
-                  className={`p-3 rounded-lg border ${
-                    isSelected ? 'border-green-500 bg-green-50' : 'border-gray-200'
-                  }`}
-                  onClick={() => {
-                    setSelectedStoreId(store.id);
-                    setVisible(false);
-                  }}
-                >
-                  <Box className="flex justify-between items-start">
-                    <Box className="flex-1">
-                      <Text.Title size="small">{store.name}</Text.Title>
-                      <Text size="xSmall" className="text-gray-500 mt-1">
-                        {store.address}
-                      </Text>
-                      {store.phone && (
-                        <Text size="xSmall" className="text-gray-500">
-                          {store.phone}
+            <Box className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {sortedStores.map((store) => {
+                const isSelected = store.id === selectedStoreId;
+                const distance = store.distance;
+
+                return (
+                  <Box
+                    key={store.id}
+                    className={`p-3 rounded-lg border ${isSelected ? 'border-green-500 bg-green-50' : 'border-gray-200'
+                      }`}
+                    onClick={() => {
+                      setSelectedStoreId(store.id);
+                      setVisible(false);
+                    }}
+                  >
+                    <Box className="flex justify-between items-start">
+                      <Box className="flex-1">
+                        <Text.Title size="small">{store.name}</Text.Title>
+                        <Text size="xSmall" className="text-gray-500 mt-1">
+                          {store.address}
                         </Text>
+                        {store.phone && (
+                          <Text size="xSmall" className="text-gray-500">
+                            {store.phone}
+                          </Text>
+                        )}
+                      </Box>
+                      {isSelected && (
+                        <Icon icon="zi-check" className="text-green-600 ml-2" size={20} />
                       )}
                     </Box>
-                    {isSelected && (
-                      <Icon icon="zi-check" className="text-green-600 ml-2" size={20} />
+                    {distance !== undefined && (
+                      <Box className="mt-2">
+                        <Text size="xSmall" className="text-blue-600">
+                          Khoảng cách: {displayDistance(distance)}
+                        </Text>
+                      </Box>
                     )}
                   </Box>
-                  {distance !== undefined && (
-                    <Box className="mt-2">
-                      <Text size="xSmall" className="text-blue-600">
-                        Khoảng cách: {displayDistance(distance)}
-                      </Text>
-                    </Box>
-                  )}
-                </Box>
-              );
-            })}
+                );
+              })}
+            </Box>
           </Box>
-        </Box>
-      </Sheet>
+        </Sheet>,
+        document.body
+      )}
     </>
   );
 };

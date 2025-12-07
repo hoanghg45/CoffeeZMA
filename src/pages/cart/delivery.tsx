@@ -13,6 +13,7 @@ import {
 } from "state";
 import { AddressPicker } from "components/address-picker";
 import { BranchPicker } from "components/branch-picker";
+import { VoucherPicker } from "components/voucher-picker";
 
 export const Delivery: FC = () => {
   const [note, setNote] = useRecoilState(orderNoteState);
@@ -109,6 +110,9 @@ export const Delivery: FC = () => {
           </Box>
         </Box>
       </Box>
+
+      {/* Voucher Selection */}
+      <VoucherPicker />
     </Box>
   );
 };

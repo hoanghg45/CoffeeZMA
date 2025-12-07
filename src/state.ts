@@ -397,6 +397,11 @@ export const addressEditingState = atom({
   default: false,
 });
 
+export const voucherPickerVisibleState = atom({
+  key: "voucherPickerVisible",
+  default: false,
+});
+
 export const userAddressesState = selector<UserAddress[]>({
   key: "userAddresses",
   get: async ({ get }) => {

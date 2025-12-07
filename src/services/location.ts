@@ -32,10 +32,12 @@ export const getCurrentLocation = async (): Promise<LocationCoordinates | null> 
       const lng = parseFloat(locationResult.longitude);
 
       if (!isNaN(lat) && !isNaN(lng)) {
-        return {
+        const locationData = {
           latitude: lat,
           longitude: lng,
         };
+        console.log("📍 Get Location Direct success:", locationData);
+        return locationData;
       }
     }
 

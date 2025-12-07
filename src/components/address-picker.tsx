@@ -118,8 +118,8 @@ export const AddressPicker: FC = () => {
         ...prev,
         lat: latitude,
         long: longitude,
-        // Don't set address to coordinates - let user enter proper address
-        // In production, use reverse geocoding API here
+        // Populate address with coordinates so user can see and save immediately
+        address: `Vị trí hiện tại: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
       }));
     } catch (error) {
       console.error("Error getting location:", error);
