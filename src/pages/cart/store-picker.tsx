@@ -10,7 +10,7 @@ import {
 import {
   nearbyStoresState,
   requestLocationTriesState,
-  selectedStoreIndexState,
+  selectedStoreIdState,
   selectedStoreState,
 } from "state";
 import { Store } from "types/delivery";
@@ -19,7 +19,7 @@ import { displayDistance } from "utils/location";
 export const StorePicker: FC = () => {
   const [visible, setVisible] = useState(false);
   const nearbyStores = useRecoilValueLoadable(nearbyStoresState);
-  const setSelectedStoreIndex = useSetRecoilState(selectedStoreIndexState);
+  const setSelectedStoreId = useSetRecoilState(selectedStoreIdState);
   const selectedStore = useRecoilValue(selectedStoreState);
 
   if (!selectedStore) {
@@ -41,13 +41,13 @@ export const StorePicker: FC = () => {
             onClose={() => setVisible(false)}
             actions={[
               nearbyStores.contents.map(
-                (store: Store & { distance?: number }, i) => ({
+                (store: Store & { distance?: number }) => ({
                   text: store.distance
                     ? `${store.name} - ${displayDistance(store.distance)}`
                     : store.name,
                   highLight: store.id === selectedStore?.id,
                   onClick: () => {
-                    setSelectedStoreIndex(i);
+                    setSelectedStoreId(store.id);
                   },
                 }),
               ),

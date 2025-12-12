@@ -4,11 +4,37 @@
  * Endpoint: POST /api/location/convert
  */
 
+// Allowed origins for CORS (can be configured via environment variable)
+const getAllowedOrigins = () => {
+  const envOrigins = process.env.ALLOWED_ORIGINS;
+  if (envOrigins) {
+    return envOrigins.split(',').map(o => o.trim());
+  }
+  // Default allowed origins (Zalo Mini App domains and localhost for development)
+  return [
+    'https://h5.zaloplatforms.com',
+    'https://h5.zdn.vn',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5173',
+  ];
+};
+
 export default async function handler(req, res) {
-  // Enable CORS
+  // Get origin from request
+  const origin = req.headers.origin || '';
+  const allowedOrigins = getAllowedOrigins();
+
+  // Validate origin against whitelist
+  const isAllowedOrigin = allowedOrigins.some(allowed =>
+    origin === allowed || allowed === '*'
+  );
+
+  // Set CORS headers with validated origin
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Origin', isAllowedOrigin ? origin : allowedOrigins[0]);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
@@ -30,7 +56,7 @@ export default async function handler(req, res) {
 
     // Validate required parameters
     if (!token || !accessToken) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Missing required parameters',
         details: 'Both token and accessToken are required'
       });
@@ -41,7 +67,7 @@ export default async function handler(req, res) {
 
     if (!secretKey) {
       console.error('ZALO_APP_SECRET_KEY is not set in Vercel environment variables');
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: 'Server configuration error',
         details: 'ZALO_APP_SECRET_KEY environment variable is not configured'
       });
@@ -70,7 +96,7 @@ export default async function handler(req, res) {
     } catch (fetchError) {
       clearTimeout(timeoutId);
       if (fetchError.name === 'AbortError') {
-        return res.status(504).json({ 
+        return res.status(504).json({
           error: 'Request timeout',
           details: 'Zalo API request timed out after 10 seconds'
         });
@@ -81,7 +107,7 @@ export default async function handler(req, res) {
     if (!zaloResponse.ok) {
       const errorText = await zaloResponse.text();
       console.error('Zalo API error:', errorText);
-      return res.status(zaloResponse.status).json({ 
+      return res.status(zaloResponse.status).json({
         error: 'Zalo API request failed',
         details: errorText
       });
@@ -90,7 +116,7 @@ export default async function handler(req, res) {
     const zaloData = await zaloResponse.json();
 
     if (zaloData.error !== 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Zalo API returned an error',
         details: zaloData.message || 'Unknown error',
         errorCode: zaloData.error
@@ -98,7 +124,7 @@ export default async function handler(req, res) {
     }
 
     if (!zaloData.data || !zaloData.data.latitude || !zaloData.data.longitude) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Invalid response from Zalo API',
         details: 'Missing latitude or longitude in response'
       });
@@ -114,7 +140,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error in location conversion:', error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Internal server error',
       details: error.message || 'Unknown error occurred'
     });

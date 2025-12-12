@@ -7,6 +7,7 @@ import { cartState } from "state";
 import { SelectedOptions } from "types/cart";
 import { Product } from "types/product";
 import { calcFinalPrice, isIdentical } from "utils/product";
+import { sanitizeHtml } from "utils/sanitize";
 import { Box, Button, Text, Icon } from "zmp-ui";
 import { MultipleOptionPicker } from "./multiple-option-picker";
 import { QuantityPicker } from "./quantity-picker";
@@ -155,7 +156,7 @@ export const ProductPicker: FC<ProductPickerProps> = ({
                     <Text size="small" className="text-gray-500 mt-2 leading-relaxed">
                       <div
                         dangerouslySetInnerHTML={{
-                          __html: product.description ?? "",
+                          __html: sanitizeHtml(product.description),
                         }}
                       ></div>
                     </Text>
