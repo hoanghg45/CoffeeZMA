@@ -6,8 +6,10 @@ import { Product } from "types/product";
 import { Cart } from "types/cart";
 import { Notification } from "types/notification";
 import { Store } from "types/delivery";
+import { Voucher, PriceBreakdown as PriceBreakdownType } from "types/voucher";
 import { calculateDistance } from "utils/location";
 import { calcFinalPrice } from "utils/product";
+import { calculatePriceBreakdown } from "utils/pricing";
 import { wait } from "utils/async";
 import { getCategories } from "services/category";
 import { getProducts } from "services/product";
@@ -15,6 +17,7 @@ import { getVariants } from "services/variant";
 import { estimateFee } from "services/ahamove";
 import { getUserAddresses, UserAddress, ensureUserExists } from "services/user";
 import { getBranches } from "services/branch";
+import { getVoucherByCode, validateVoucher } from "services/voucher";
 
 export const userState = selector({
   key: "user",
@@ -364,6 +367,40 @@ export const checkoutSheetVisibleState = atom({
 export const appliedVoucherState = atom<string | null>({
   key: "appliedVoucher",
   default: null,
+});
+
+// Validated voucher from DB
+export const voucherState = selector<{ voucher: Voucher | null; error: string | null }>({
+  key: "voucher",
+  get: async ({ get }) => {
+    const code = get(appliedVoucherState);
+    const cart = get(cartState);
+    const subtotal = get(subtotalState);
+
+    if (!code) {
+      return { voucher: null, error: null };
+    }
+
+    const voucher = await getVoucherByCode(code);
+    if (!voucher) {
+      return { voucher: null, error: `Mã "${code}" không tồn tại` };
+    }
+
+    const validation = validateVoucher(voucher, cart, subtotal);
+    return { voucher: validation.voucher, error: validation.error };
+  },
+});
+
+// Unified price breakdown - single source of truth
+export const priceBreakdownState = selector<PriceBreakdownType>({
+  key: "priceBreakdown",
+  get: async ({ get }) => {
+    const cart = get(cartState);
+    const shippingFee = get(calculatedDeliveryFeeState);
+    const { voucher, error } = get(voucherState);
+
+    return calculatePriceBreakdown(cart, voucher, shippingFee, error);
+  },
 });
 
 export const cutleryCountState = atom({

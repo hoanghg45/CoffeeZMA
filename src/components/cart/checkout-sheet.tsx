@@ -1,14 +1,12 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, Suspense } from "react";
 import { Box, Text, Button } from "zmp-ui";
-import { X, ShoppingCart, ArrowRight } from "lucide-react";
+import { X, ShoppingCart, ArrowRight, AlertCircle } from "lucide-react";
 import { Sheet } from "components/fullscreen-sheet";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
     checkoutSheetVisibleState,
     cartState,
-    totalPriceState,
-    deliveryFeeState,
-    appliedVoucherState,
+    priceBreakdownState,
 } from "state";
 import { CheckoutItem } from "./checkout-item";
 import { VoucherSection } from "./voucher-section";
@@ -19,23 +17,157 @@ import { CartItem } from "types/cart";
 import { createPortal } from "react-dom";
 import pay from "utils/product";
 
-export const CheckoutSheet: FC = () => {
-    const [visible, setVisible] = useRecoilState(checkoutSheetVisibleState);
+const CheckoutContent: FC<{ onClose: () => void }> = ({ onClose }) => {
     const cart = useRecoilValue(cartState);
-    const totalPrice = useRecoilValue(totalPriceState);
-    const deliveryFee = useRecoilValue(deliveryFeeState);
-    const appliedVoucher = useRecoilValue(appliedVoucherState);
+    const priceBreakdown = useRecoilValue(priceBreakdownState);
     const [editingItem, setEditingItem] = useState<CartItem | undefined>();
 
-    const discount = appliedVoucher === "WELCOME" ? totalPrice * 0.5 : 0;
-    const finalTotal = totalPrice - discount + deliveryFee;
-
-    const handleClose = () => {
-        setVisible(false);
+    const handleCheckout = () => {
+        pay(priceBreakdown.finalPrice);
+        onClose();
     };
 
-    const handleCheckout = () => {
-        pay(finalTotal);
+    return (
+        <Box className="flex flex-col h-full bg-white rounded-t-3xl overflow-hidden">
+            {/* Header */}
+            <Box className="flex-none px-4 py-4 pb-3 border-b border-gray-100 relative">
+                <Text.Title size="large" className="text-center font-bold">
+                    Cart
+                </Text.Title>
+                <button
+                    onClick={onClose}
+                    className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 active:bg-gray-200 transition-colors"
+                >
+                    <X size={20} className="text-gray-700" />
+                </button>
+            </Box>
+
+            {/* Scrollable Content */}
+            <Box className="flex-1 overflow-y-auto">
+                {cart.length > 0 ? (
+                    <Box className="px-4 py-4">
+                        {/* Cart Items */}
+                        <Box className="divide-y divide-gray-100">
+                            {cart.map((item, index) => (
+                                <CheckoutItem
+                                    key={`${item.product.id}-${index}`}
+                                    item={item}
+                                    onEdit={() => setEditingItem(item)}
+                                />
+                            ))}
+                        </Box>
+
+                        {/* Voucher Section */}
+                        <Box className="mt-4">
+                            <VoucherSection />
+                        </Box>
+
+                        {/* Voucher Error */}
+                        {priceBreakdown.error && (
+                            <Box className="mt-2 flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg">
+                                <AlertCircle size={16} className="text-red-500" />
+                                <Text size="xSmall" className="text-red-600">{priceBreakdown.error}</Text>
+                            </Box>
+                        )}
+
+                        {/* Cutlery Section */}
+                        <Box className="mt-3">
+                            <CutlerySection />
+                        </Box>
+
+                        {/* Price Breakdown */}
+                        <Box className="mt-6 space-y-3 pb-4">
+                            {/* Subtotal */}
+                            <Box className="flex justify-between items-center">
+                                <Text size="small" className="text-gray-600">
+                                    Tạm tính
+                                </Text>
+                                <Text size="small" className="font-medium">
+                                    <DisplayPrice>{priceBreakdown.subtotal}</DisplayPrice>
+                                </Text>
+                            </Box>
+
+                            {/* Shipping */}
+                            <Box className="flex justify-between items-center">
+                                <Text size="small" className="text-gray-600">
+                                    Phí giao hàng
+                                </Text>
+                                <Text size="small" className="text-gray-700 font-medium">
+                                    {priceBreakdown.shippingFee === 0 ? "Miễn phí" : <DisplayPrice>{priceBreakdown.shippingFee}</DisplayPrice>}
+                                </Text>
+                            </Box>
+
+                            {/* Discount */}
+                            {priceBreakdown.discount > 0 && priceBreakdown.voucher && (
+                                <Box className="flex justify-between items-center">
+                                    <Text size="small" className="text-gray-600">
+                                        Giảm giá ({priceBreakdown.voucher.code})
+                                    </Text>
+                                    <Text size="small" className="text-green-600 font-medium">
+                                        -<DisplayPrice>{priceBreakdown.discount}</DisplayPrice>
+                                    </Text>
+                                </Box>
+                            )}
+
+                            {/* Total */}
+                            <Box className="flex justify-between items-center pt-3 border-t border-gray-200">
+                                <Text size="normal" className="font-bold text-gray-900">
+                                    Tổng cộng
+                                </Text>
+                                <Text size="large" className="font-bold text-primary">
+                                    <DisplayPrice>{priceBreakdown.finalPrice}</DisplayPrice>
+                                </Text>
+                            </Box>
+                        </Box>
+                    </Box>
+                ) : (
+                    <Box className="flex flex-col items-center justify-center h-full px-4 py-4 pb-20">
+                        <Box className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <ShoppingCart size={40} className="text-gray-400" />
+                        </Box>
+                        <Text size="normal" className="font-semibold text-gray-900 mb-2">
+                            Giỏ hàng trống
+                        </Text>
+                        <Text size="small" className="text-gray-500 text-center">
+                            Thêm sản phẩm để bắt đầu
+                        </Text>
+                    </Box>
+                )}
+            </Box>
+
+            {/* Fixed Footer - Checkout Button */}
+            {cart.length > 0 && (
+                <Box className="flex-none p-4 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+                    <Button
+                        type="highlight"
+                        fullWidth
+                        onClick={handleCheckout}
+                        className="rounded-full h-14 text-base font-bold shadow-lg"
+                        style={{
+                            backgroundColor: "#D32F2F",
+                            color: "white",
+                        }}
+                    >
+                        <Box className="flex items-center justify-center gap-2">
+                            <Text className="text-white font-bold">Thanh toán</Text>
+                            <ArrowRight size={20} className="text-white" />
+                        </Box>
+                    </Button>
+                </Box>
+            )}
+
+            {/* Product Picker for Editing */}
+            <ProductPicker product={editingItem?.product} selected={editingItem}>
+                {() => null}
+            </ProductPicker>
+        </Box>
+    );
+};
+
+export const CheckoutSheet: FC = () => {
+    const [visible, setVisible] = useRecoilState(checkoutSheetVisibleState);
+
+    const handleClose = () => {
         setVisible(false);
     };
 
@@ -51,119 +183,16 @@ export const CheckoutSheet: FC = () => {
                     handler
                     swipeToClose
                 >
-                    <Box className="flex flex-col h-full bg-white rounded-t-3xl overflow-hidden">
-                        {/* Header */}
-                        <Box className="flex-none px-4 py-4 pb-3 border-b border-gray-100 relative">
-                            <Text.Title size="large" className="text-center font-bold">
-                                Cart
-                            </Text.Title>
-                            <button
-                                onClick={handleClose}
-                                className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 active:bg-gray-200 transition-colors"
-                            >
-                                <X size={20} className="text-gray-700" />
-                            </button>
+                    <Suspense fallback={
+                        <Box className="flex items-center justify-center h-full">
+                            <Text>Loading...</Text>
                         </Box>
-
-                        {/* Scrollable Content */}
-                        <Box className="flex-1 overflow-y-auto">
-                            {cart.length > 0 ? (
-                                <Box className="px-4 py-4">
-                                    {/* Cart Items */}
-                                    <Box className="divide-y divide-gray-100">
-                                        {cart.map((item, index) => (
-                                            <CheckoutItem
-                                                key={`${item.product.id}-${index}`}
-                                                item={item}
-                                                onEdit={() => setEditingItem(item)}
-                                            />
-                                        ))}
-                                    </Box>
-
-                                    {/* Voucher Section */}
-                                    <Box className="mt-4">
-                                        <VoucherSection />
-                                    </Box>
-
-                                    {/* Cutlery Section */}
-                                    <Box className="mt-3">
-                                        <CutlerySection />
-                                    </Box>
-
-                                    {/* Price Breakdown */}
-                                    <Box className="mt-6 space-y-3 pb-4">
-                                        <Box className="flex justify-between items-center">
-                                            <Text size="small" className="text-gray-600">
-                                                Delivery Fee
-                                            </Text>
-                                            <Text size="small" className="text-green-600 font-medium">
-                                                {deliveryFee === 0 ? "0 QR" : <DisplayPrice>{deliveryFee}</DisplayPrice>}
-                                            </Text>
-                                        </Box>
-                                        {discount > 0 && (
-                                            <Box className="flex justify-between items-center">
-                                                <Text size="small" className="text-gray-600">
-                                                    Discount (WELCOME)
-                                                </Text>
-                                                <Text size="small" className="text-green-600 font-medium">
-                                                    -<DisplayPrice>{discount}</DisplayPrice>
-                                                </Text>
-                                            </Box>
-                                        )}
-                                        <Box className="flex justify-between items-center pt-3 border-t border-gray-200">
-                                            <Text size="normal" className="font-bold text-gray-900">
-                                                Total
-                                            </Text>
-                                            <Text size="large" className="font-bold text-primary">
-                                                <DisplayPrice>{finalTotal}</DisplayPrice>
-                                            </Text>
-                                        </Box>
-                                    </Box>
-                                </Box>
-                            ) : (
-                                <Box className="flex flex-col items-center justify-center h-full px-4 py-4 pb-20">
-                                    <Box className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                        <ShoppingCart size={40} className="text-gray-400" />
-                                    </Box>
-                                    <Text size="normal" className="font-semibold text-gray-900 mb-2">
-                                        Your cart is empty
-                                    </Text>
-                                    <Text size="small" className="text-gray-500 text-center">
-                                        Add items to get started
-                                    </Text>
-                                </Box>
-                            )}
-                        </Box>
-
-                        {/* Fixed Footer - Checkout Button */}
-                        {cart.length > 0 && (
-                            <Box className="flex-none p-4 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
-                                <Button
-                                    type="highlight"
-                                    fullWidth
-                                    onClick={handleCheckout}
-                                    className="rounded-full h-14 text-base font-bold shadow-lg"
-                                    style={{
-                                        backgroundColor: "#D32F2F",
-                                        color: "white",
-                                    }}
-                                >
-                                    <Box className="flex items-center justify-center gap-2">
-                                        <Text className="text-white font-bold">Go to Checkout</Text>
-                                        <ArrowRight size={20} className="text-white" />
-                                    </Box>
-                                </Button>
-                            </Box>
-                        )}
-                    </Box>
+                    }>
+                        <CheckoutContent onClose={handleClose} />
+                    </Suspense>
                 </Sheet>,
                 document.body
             )}
-
-            {/* Product Picker for Editing */}
-            <ProductPicker product={editingItem?.product} selected={editingItem}>
-                {() => null}
-            </ProductPicker>
         </>
     );
 };
