@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useRecoilRefresher_UNSTABLE } from "recoil";
-import { Box, Button, Icon, Input, Text } from "zmp-ui";
+import { Box, Button, Input, Text } from "zmp-ui";
+import { MapPin, ChevronRight, Plus, Edit, Trash2, X, Bookmark, Phone } from "lucide-react";
 import { Sheet } from "./fullscreen-sheet";
 import { createPortal } from "react-dom";
 import { selectedAddressState, userAddressesState, userState, addressPickerVisibleState, addressEditingState } from "../state";
@@ -133,7 +134,7 @@ export const AddressPicker: FC = () => {
         onClick={() => setVisible(true)}
       >
         <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-2">
-          <Icon icon="zi-location" className="text-yellow-600" size={20} />
+          <MapPin className="text-yellow-600" size={20} />
         </Box>
         <Box className="flex-1 min-w-0">
           <Text.Title size="small" className="font-bold truncate">{selectedAddress?.name || "Chọn địa chỉ"}</Text.Title>
@@ -141,7 +142,7 @@ export const AddressPicker: FC = () => {
             {selectedAddress?.address || "Vui lòng chọn địa chỉ giao hàng"}
           </Text>
         </Box>
-        <Icon icon="zi-chevron-right" size={20} className="text-gray-400 ml-2" />
+        <ChevronRight size={20} className="text-gray-400 ml-2" />
       </Box>
 
       <Sheet
@@ -157,7 +158,7 @@ export const AddressPicker: FC = () => {
             <Button
               size="small"
               variant="primary"
-              icon={<Icon icon="zi-plus" />}
+              icon={<Plus size={20} />}
               onClick={() => {
                 setIsEditing(true);
                 setEditingAddress(null);
@@ -172,7 +173,7 @@ export const AddressPicker: FC = () => {
           <Box className="space-y-3 max-h-[50vh] overflow-y-auto">
             {addresses.length === 0 ? (
               <Box className="text-center py-8">
-                <Icon icon="zi-location" size={48} className="text-gray-300 mx-auto mb-3" />
+                <MapPin size={48} className="text-gray-300 mx-auto mb-3" />
                 <Text size="small" className="text-gray-500">Chưa có địa chỉ nào</Text>
               </Box>
             ) : (
@@ -196,8 +197,7 @@ export const AddressPicker: FC = () => {
                         ? 'bg-primary'
                         : 'bg-gray-100'
                         }`}>
-                        <Icon
-                          icon="zi-location"
+                        <MapPin
                           className={selectedAddress?.id === addr.id ? 'text-white' : 'text-gray-600'}
                           size={20}
                         />
@@ -224,7 +224,7 @@ export const AddressPicker: FC = () => {
                         className="w-9 h-9 p-0 rounded-full bg-green-50 hover:bg-green-100 active:bg-green-200"
                         onClick={(e) => handleEdit(addr, e)}
                       >
-                        <Icon icon="zi-edit" size={18} className="text-green-600" />
+                        <Edit size={18} className="text-green-600" />
                       </Button>
                       <Button
                         variant="tertiary"
@@ -235,7 +235,7 @@ export const AddressPicker: FC = () => {
                           setDeleteConfirmId(addr.id);
                         }}
                       >
-                        <Icon icon="zi-delete" size={18} className="text-red-600" />
+                        <Trash2 size={18} className="text-red-600" />
                       </Button>
                     </Box>
                   </Box>
@@ -262,7 +262,7 @@ export const AddressPicker: FC = () => {
               className="absolute top-3 right-3 z-50 bg-white/80 backdrop-blur-sm rounded-full p-1 shadow-sm cursor-pointer active:opacity-70 transition-opacity"
               onClick={handleCancelEdit}
             >
-              <Icon icon="zi-close" className="text-gray-600" size={24} />
+              <X className="text-gray-600" size={24} />
             </div>
 
             {/* Content Area - Compact */}
@@ -280,7 +280,7 @@ export const AddressPicker: FC = () => {
                 <Box className="bg-white rounded-xl p-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                   <Box className="flex items-center space-x-3">
                     <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                      <Icon icon="zi-bookmark" className="text-yellow-600" size={18} />
+                      <Bookmark className="text-yellow-600" size={18} />
                     </Box>
                     <Box className="flex-1 min-w-0">
                       <Text size="xSmall" className="text-gray-500 mb-0.5">Tên gợi nhớ</Text>
@@ -298,7 +298,7 @@ export const AddressPicker: FC = () => {
                 <Box className="bg-white rounded-xl p-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                   <Box className="flex items-center space-x-3">
                     <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                      <Icon icon="zi-location" className="text-yellow-600" size={18} />
+                      <MapPin className="text-yellow-600" size={18} />
                     </Box>
                     <Box className="flex-1 min-w-0">
                       <Box className="flex items-center justify-between mb-0.5">
@@ -307,7 +307,7 @@ export const AddressPicker: FC = () => {
                           className="w-6 h-6 flex items-center justify-center active:opacity-50 cursor-pointer"
                           onClick={handleGetCurrentLocation}
                         >
-                          <Icon icon="zi-location" size={16} className="text-gray-400" />
+                          <MapPin size={16} className="text-gray-400" />
                         </Box>
                       </Box>
                       <Input
@@ -324,7 +324,7 @@ export const AddressPicker: FC = () => {
                 <Box className="bg-white rounded-xl p-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                   <Box className="flex items-center space-x-3">
                     <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                      <Icon icon="zi-call" className="text-yellow-600" size={18} />
+                      <Phone className="text-yellow-600" size={18} />
                     </Box>
                     <Box className="flex-1 min-w-0">
                       <Text size="xSmall" className="text-gray-500 mb-0.5">Số điện thoại nhận hàng</Text>
@@ -379,7 +379,7 @@ export const AddressPicker: FC = () => {
         <Box className="p-6 space-y-4">
           <Box className="text-center">
             <Box className="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center mx-auto mb-4">
-              <Icon icon="zi-delete" size={32} className="text-error" />
+              <Trash2 size={32} className="text-error" />
             </Box>
             <Text.Title size="large" className="mb-2">Xóa địa chỉ?</Text.Title>
             <Text size="small" className="text-gray-600">

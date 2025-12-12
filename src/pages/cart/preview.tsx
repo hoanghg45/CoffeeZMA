@@ -3,7 +3,8 @@ import React, { FC } from "react";
 import { useRecoilValue, useRecoilValueLoadable } from "recoil";
 import { totalPriceState, totalQuantityState, subtotalState, calculatedDeliveryFeeState } from "state";
 import pay from "utils/product";
-import { Box, Button, Text, Icon } from "zmp-ui";
+import { Box, Button, Text } from "zmp-ui";
+import { ArrowRight } from "lucide-react";
 
 export const CartPreview: FC = () => {
   const quantity = useRecoilValue(totalQuantityState);
@@ -56,7 +57,7 @@ export const CartPreview: FC = () => {
       >
         <Box className="flex items-center justify-center gap-2">
           <Text className="text-white font-bold">Đặt hàng ({quantity})</Text>
-          <Icon icon="zi-arrow-right" size={18} className="text-white" />
+          <ArrowRight size={18} className="text-white" />
         </Box>
       </Button>
     </Box>

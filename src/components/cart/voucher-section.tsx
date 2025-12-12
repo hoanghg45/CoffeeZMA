@@ -1,5 +1,6 @@
 import React, { FC } from "react";
-import { Box, Text, Icon } from "zmp-ui";
+import { Box, Text } from "zmp-ui";
+import { TicketPercent, ChevronRight } from "lucide-react";
 import { useRecoilState } from "recoil";
 import { appliedVoucherState } from "state";
 
@@ -16,7 +17,7 @@ export const VoucherSection: FC = () => {
         >
             <Box className="flex items-center gap-3">
                 <Box className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                    <Icon icon="zi-star" size={20} className="text-primary" />
+                    <TicketPercent size={20} className="text-primary" />
                 </Box>
                 <Box>
                     <Text size="small" className="font-semibold text-gray-900">
@@ -29,7 +30,7 @@ export const VoucherSection: FC = () => {
                     )}
                 </Box>
             </Box>
-            <Icon icon="zi-chevron-right" size={20} className="text-gray-400" />
+            <ChevronRight size={20} className="text-gray-400" />
         </Box>
     );
 };

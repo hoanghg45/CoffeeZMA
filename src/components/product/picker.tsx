@@ -8,7 +8,8 @@ import { SelectedOptions } from "types/cart";
 import { Product } from "types/product";
 import { calcFinalPrice, isIdentical } from "utils/product";
 import { sanitizeHtml } from "utils/sanitize";
-import { Box, Button, Text, Icon } from "zmp-ui";
+import { Box, Button, Text } from "zmp-ui";
+import { X } from "lucide-react";
 import { MultipleOptionPicker } from "./multiple-option-picker";
 import { QuantityPicker } from "./quantity-picker";
 import { SingleOptionPicker } from "./single-option-picker";
@@ -131,7 +132,7 @@ export const ProductPicker: FC<ProductPickerProps> = ({
                 className="absolute top-3 right-3 z-50 bg-white/80 backdrop-blur-sm rounded-full p-1 shadow-sm cursor-pointer"
                 onClick={() => setVisible(false)}
               >
-                <Icon icon="zi-close" className="text-gray-600" size={24} />
+                <X className="text-gray-600" size={24} />
               </div>
 
               {/* Scrollable Content Area */}

@@ -1,6 +1,7 @@
 import { ElasticTextarea } from "components/elastic-textarea";
 import React, { FC, Suspense } from "react";
-import { Box, Icon, Text } from "zmp-ui";
+import { Box, Text } from "zmp-ui";
+import { Home, Clock, User, ChevronRight, FileText } from "lucide-react";
 import { RequestPersonPickerPhone } from "./person-picker";
 import { TimePicker } from "./time-picker";
 import { useRecoilState, useRecoilValueLoadable, useSetRecoilState } from "recoil";
@@ -48,7 +49,7 @@ export const Delivery: FC = () => {
         {/* Branch Selection (Source) */}
         <Box className="flex items-start space-x-3">
           <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mt-1">
-            <Icon icon="zi-home" className="text-yellow-600" size={20} />
+            <Home className="text-yellow-600" size={20} />
           </Box>
           <Box className="flex-1">
             <Text size="xSmall" className="text-gray-500 mb-1">Giao từ cửa hàng</Text>
@@ -64,14 +65,14 @@ export const Delivery: FC = () => {
       <Box className="bg-surface rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
         <Box className="flex items-center space-x-3">
           <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
-            <Icon icon="zi-clock-1" className="text-yellow-600" size={20} />
+            <Clock className="text-yellow-600" size={20} />
           </Box>
           <Box flex className="flex-1 items-center justify-between">
             <Box className="flex-1 space-y-[2px]">
               <Text size="small" className="font-bold text-gray-800">Thời gian nhận</Text>
               <TimePicker />
             </Box>
-            <Icon icon="zi-chevron-right" className="text-gray-400" size={20} />
+            <ChevronRight className="text-gray-400" size={20} />
           </Box>
         </Box>
       </Box>
@@ -80,7 +81,7 @@ export const Delivery: FC = () => {
       <Box className="bg-surface rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] space-y-4">
         <Box className="flex items-center space-x-3">
           <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
-            <Icon icon="zi-user" className="text-yellow-600" size={20} />
+            <User className="text-yellow-600" size={20} />
           </Box>
           <Box
             flex
@@ -91,13 +92,13 @@ export const Delivery: FC = () => {
             <Suspense fallback={<Text className="text-gray-400">Đang tải thông tin...</Text>}>
               <RequestPersonPickerPhone />
             </Suspense>
-            <Icon icon="zi-chevron-right" className="text-gray-400" size={20} />
+            <ChevronRight className="text-gray-400" size={20} />
           </Box>
         </Box>
 
         <Box className="flex items-start space-x-3">
           <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mt-2">
-            <Icon icon="zi-note" className="text-yellow-600" size={20} />
+            <FileText className="text-yellow-600" size={20} />
           </Box>
           <Box flex className="flex-1">
             <ElasticTextarea

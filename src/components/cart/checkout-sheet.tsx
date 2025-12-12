@@ -1,5 +1,6 @@
 import React, { FC, useState } from "react";
-import { Box, Text, Button, Icon } from "zmp-ui";
+import { Box, Text, Button } from "zmp-ui";
+import { X, ShoppingCart, ArrowRight } from "lucide-react";
 import { Sheet } from "components/fullscreen-sheet";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
@@ -60,7 +61,7 @@ export const CheckoutSheet: FC = () => {
                                 onClick={handleClose}
                                 className="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 active:bg-gray-200 transition-colors"
                             >
-                                <Icon icon="zi-close" size={20} className="text-gray-700" />
+                                <X size={20} className="text-gray-700" />
                             </button>
                         </Box>
 
@@ -122,7 +123,7 @@ export const CheckoutSheet: FC = () => {
                             ) : (
                                 <Box className="flex flex-col items-center justify-center h-full px-4 py-4 pb-20">
                                     <Box className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                        <Icon icon="zi-delete" size={40} className="text-gray-400" />
+                                        <ShoppingCart size={40} className="text-gray-400" />
                                     </Box>
                                     <Text size="normal" className="font-semibold text-gray-900 mb-2">
                                         Your cart is empty
@@ -149,7 +150,7 @@ export const CheckoutSheet: FC = () => {
                                 >
                                     <Box className="flex items-center justify-center gap-2">
                                         <Text className="text-white font-bold">Go to Checkout</Text>
-                                        <Icon icon="zi-arrow-right" size={20} className="text-white" />
+                                        <ArrowRight size={20} className="text-white" />
                                     </Box>
                                 </Button>
                             </Box>

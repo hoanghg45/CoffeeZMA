@@ -1,5 +1,6 @@
 import React, { ReactNode, useMemo, useState } from "react";
-import { Box, Button, Icon, Text } from "zmp-ui";
+import { Box, Button, Text } from "zmp-ui";
+import { ChevronDown } from "lucide-react";
 
 interface ListRendererProps<T> {
   title?: string;
@@ -55,7 +56,7 @@ export function ListRenderer<T>({
             <Button
               onClick={() => setIsCollapsed(false)}
               fullWidth
-              suffixIcon={<Icon icon="zi-chevron-down" />}
+              suffixIcon={<ChevronDown size={20} />}
               variant="tertiary"
               type="neutral"
             >

@@ -1,5 +1,6 @@
 import React, { FC } from "react";
-import { Box, Text, Icon } from "zmp-ui";
+import { Box, Text } from "zmp-ui";
+import { Utensils, Edit } from "lucide-react";
 import { useRecoilState } from "recoil";
 import { cutleryCountState } from "state";
 
@@ -15,7 +16,7 @@ export const CutlerySection: FC = () => {
         <Box className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
             <Box className="flex items-center gap-3">
                 <Box className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
-                    <Icon icon="zi-more-grid" size={20} className="text-gray-700" />
+                    <Utensils size={20} className="text-gray-700" />
                 </Box>
                 <Box>
                     <Text size="small" className="font-semibold text-gray-900">
@@ -33,7 +34,7 @@ export const CutlerySection: FC = () => {
                 <Text size="small" className="text-white font-semibold">
                     {cutleryCount} sets
                 </Text>
-                <Icon icon="zi-edit" size={16} className="text-white" />
+                <Edit size={16} className="text-white" />
             </Box>
         </Box>
     );

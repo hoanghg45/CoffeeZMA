@@ -1,7 +1,8 @@
 import React, { FC, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRecoilState, useRecoilValue, useRecoilValueLoadable } from "recoil";
-import { Box, Icon, Sheet, Text } from "zmp-ui";
+import { Box, Sheet, Text } from "zmp-ui";
+import { ChevronRight, Check } from "lucide-react";
 import { selectedStoreIdState, storesState, locationState } from "../state";
 import { Store } from "../types/delivery";
 import { displayDistance, calculateDistance } from "../utils/location";
@@ -72,7 +73,7 @@ export const BranchPicker: FC = () => {
             )}
           </Text>
         </Box>
-        <Icon icon="zi-chevron-right" size={20} className="text-gray-400 ml-2" />
+        <ChevronRight size={20} className="text-gray-400 ml-2" />
       </Box>
 
       {mounted && createPortal(
@@ -115,7 +116,7 @@ export const BranchPicker: FC = () => {
                         )}
                       </Box>
                       {isSelected && (
-                        <Icon icon="zi-check" className="text-green-600 ml-2" size={20} />
+                        <Check className="text-green-600 ml-2" size={20} />
                       )}
                     </Box>
                     {distance !== undefined && (

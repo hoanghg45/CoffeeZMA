@@ -2,17 +2,18 @@ import { useVirtualKeyboardVisible } from "hooks";
 import React, { FC, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { MenuItem } from "types/menu";
-import { BottomNavigation, Icon } from "zmp-ui";
+import { BottomNavigation } from "zmp-ui";
+import { Home, Bell, User } from "lucide-react";
 import { CartIcon } from "./cart-icon";
 
 const tabs: Record<string, MenuItem> = {
   "/": {
     label: "Trang chủ",
-    icon: <Icon icon="zi-home" />,
+    icon: <Home size={24} />,
   },
   "/notification": {
     label: "Thông báo",
-    icon: <Icon icon="zi-notif" />,
+    icon: <Bell size={24} />,
   },
   "/cart": {
     label: "Giỏ hàng",
@@ -21,7 +22,7 @@ const tabs: Record<string, MenuItem> = {
   },
   "/profile": {
     label: "Cá nhân",
-    icon: <Icon icon="zi-user" />,
+    icon: <User size={24} />,
   },
 };
 

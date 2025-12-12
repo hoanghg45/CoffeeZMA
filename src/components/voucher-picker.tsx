@@ -1,6 +1,7 @@
 import React, { FC, useState } from "react";
 import { useRecoilState } from "recoil";
-import { Box, Button, Icon, Input, Text } from "zmp-ui";
+import { Box, Button, Input, Text } from "zmp-ui";
+import { TicketPercent, Tag, ChevronRight, XCircle, CheckCircle2 } from "lucide-react";
 import { Sheet } from "./fullscreen-sheet";
 import { appliedVoucherState, voucherPickerVisibleState } from "../state";
 
@@ -37,8 +38,7 @@ export const VoucherPicker: FC = () => {
             >
                 <Box className="flex items-center space-x-3">
                     <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
-                        {/* Using zi-star as a safe alternative for offers */}
-                        <Icon icon="zi-star" className="text-yellow-600" size={20} />
+                        <TicketPercent className="text-yellow-600" size={20} />
                     </Box>
                     <Box flex className="flex-1 items-center justify-between min-w-0">
                         <Box className="flex-1">
@@ -49,10 +49,10 @@ export const VoucherPicker: FC = () => {
                         </Box>
                         {appliedVoucher ? (
                             <Box onClick={removeVoucher} className="p-1">
-                                <Icon icon="zi-close-circle" className="text-gray-400" size={20} />
+                                <XCircle className="text-gray-400" size={20} />
                             </Box>
                         ) : (
-                            <Icon icon="zi-chevron-right" className="text-gray-400" size={20} />
+                            <ChevronRight className="text-gray-400" size={20} />
                         )}
                     </Box>
                 </Box>
@@ -107,14 +107,14 @@ export const VoucherPicker: FC = () => {
                             >
                                 <Box className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${appliedVoucher === voucher.code ? "bg-primary text-white" : "bg-yellow-100 text-yellow-600"
                                     }`}>
-                                    <Icon icon="zi-star-solid" size={24} />
+                                    <Tag size={20} />
                                 </Box>
                                 <Box className="flex-1">
                                     <Text className="font-bold text-gray-800 text-base">{voucher.code}</Text>
                                     <Text size="xSmall" className="text-gray-500">{voucher.title} • {voucher.desc}</Text>
                                 </Box>
                                 {appliedVoucher === voucher.code && (
-                                    <Icon icon="zi-check-circle-solid" className="text-primary" size={24} />
+                                    <CheckCircle2 className="text-primary" size={24} />
                                 )}
                             </Box>
                         ))}

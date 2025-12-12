@@ -1,5 +1,6 @@
 import React, { FC } from "react";
-import { Box, Text, Button, Icon } from "zmp-ui";
+import { Box, Text } from "zmp-ui";
+import { Edit, Minus, Plus } from "lucide-react";
 import { CartItem } from "types/cart";
 import { FinalPrice } from "components/display/final-price";
 import { useSetRecoilState } from "recoil";
@@ -48,7 +49,7 @@ export const CheckoutItem: FC<CheckoutItemProps> = ({ item, onEdit }) => {
                         className="flex items-center gap-1 mt-1 cursor-pointer"
                         onClick={onEdit}
                     >
-                        <Icon icon="zi-edit" size={14} className="text-gray-400" />
+                        <Edit size={14} className="text-gray-400" />
                         <Text size="xxxSmall" className="text-gray-400">
                             {item.quantity > 1 ? "Edit Special Request" : "Add Special Request"}
                         </Text>
@@ -66,7 +67,7 @@ export const CheckoutItem: FC<CheckoutItemProps> = ({ item, onEdit }) => {
                             onClick={() => updateQuantity(item.quantity - 1)}
                             className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:bg-gray-200 transition-colors"
                         >
-                            <div className="w-3 h-0.5 bg-gray-600" />
+                            <Minus size={12} className="text-gray-600" />
                         </button>
                         <Text size="normal" className="font-semibold min-w-[20px] text-center">
                             {item.quantity}
@@ -75,7 +76,7 @@ export const CheckoutItem: FC<CheckoutItemProps> = ({ item, onEdit }) => {
                             onClick={() => updateQuantity(item.quantity + 1)}
                             className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center active:bg-gray-200 transition-colors"
                         >
-                            <Icon icon="zi-plus" size={16} className="text-gray-600" />
+                            <Plus size={16} className="text-gray-600" />
                         </button>
                     </Box>
                 </Box>

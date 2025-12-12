@@ -1,5 +1,6 @@
 import React, { FC } from "react";
-import { Box, Button, Icon, Text } from "zmp-ui";
+import { Box, Button, Text } from "zmp-ui";
+import { Minus, Plus } from "lucide-react";
 
 export const QuantityPicker: FC<{
   value: number;
@@ -12,11 +13,7 @@ export const QuantityPicker: FC<{
         onClick={() => onChange(value - 1)}
         variant="secondary"
         type="neutral"
-        icon={
-          <div className="py-3 px-1">
-            <div className="w-full h-[2px] bg-black" />
-          </div>
-        }
+        icon={<Minus size={20} />}
       />
       <Box flex justifyContent="center" alignItems="center" className="flex-1 px-3">
         <Text size="large" className="font-medium">
@@ -27,7 +24,7 @@ export const QuantityPicker: FC<{
         onClick={() => onChange(value + 1)}
         variant="secondary"
         type="neutral"
-        icon={<Icon icon="zi-plus" />}
+        icon={<Plus size={20} />}
       />
     </Box>
   );

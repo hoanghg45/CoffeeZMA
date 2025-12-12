@@ -1,5 +1,6 @@
 import React, { FC, useState, Suspense } from "react";
-import { Box, Header, Icon, Page, Text, Sheet } from "zmp-ui";
+import { Box, Header, Page, Text, Sheet } from "zmp-ui";
+import { User, ChevronRight, MapPin, Clock, Star, Phone } from "lucide-react";
 import subscriptionDecor from "static/subscription-decor.svg";
 import { ListRenderer } from "components/list-renderer";
 import { useToBeImplemented } from "hooks";
@@ -12,12 +13,12 @@ const Subscription: FC = () => {
   // However, for safety, we can wrap usage in components or rely on error boundaries.
   // Since we are in a Page, let's rely on the userState being loaded or suspended at Page level if we don't wrap.
   // BUT, ProfilePage is rendered directly.
-  
+
   // Actually, safe to assume userState loads fast or we use Loadable.
   // But let's check if userState suspends. Yes it does (async).
   // So we should wrap the content of Subscription or the whole component call.
   const user = useRecoilValue(userState);
-  
+
   return (
     <Box className="m-4">
       <Box
@@ -46,35 +47,35 @@ const Personal: FC = () => {
         onClick={onClick}
         items={[
           {
-            left: <Icon icon="zi-user" />,
+            left: <User size={24} />,
             right: (
               <Box flex>
                 <Text.Header className="flex-1 items-center font-normal">
                   Thông tin tài khoản
                 </Text.Header>
-                <Icon icon="zi-chevron-right" />
+                <ChevronRight size={24} />
               </Box>
             ),
           },
           {
-            left: <Icon icon="zi-location" />,
+            left: <MapPin size={24} />,
             right: (
               <Box flex onClick={() => setAddressSheetVisible(true)}>
                 <Text.Header className="flex-1 items-center font-normal">
                   Sổ địa chỉ
                 </Text.Header>
-                <Icon icon="zi-chevron-right" />
+                <ChevronRight size={24} />
               </Box>
             ),
           },
           {
-            left: <Icon icon="zi-clock-2" />,
+            left: <Clock size={24} />,
             right: (
               <Box flex>
                 <Text.Header className="flex-1 items-center font-normal">
                   Lịch sử đơn hàng
                 </Text.Header>
-                <Icon icon="zi-chevron-right" />
+                <ChevronRight size={24} />
               </Box>
             ),
           },
@@ -111,24 +112,24 @@ const Other: FC = () => {
         onClick={onClick}
         items={[
           {
-            left: <Icon icon="zi-star" />,
+            left: <Star size={24} />,
             right: (
               <Box flex>
                 <Text.Header className="flex-1 items-center font-normal">
                   Đánh giá đơn hàng
                 </Text.Header>
-                <Icon icon="zi-chevron-right" />
+                <ChevronRight size={24} />
               </Box>
             ),
           },
           {
-            left: <Icon icon="zi-call" />,
+            left: <Phone size={24} />,
             right: (
               <Box flex>
                 <Text.Header className="flex-1 items-center font-normal">
                   Liên hệ và góp ý
                 </Text.Header>
-                <Icon icon="zi-chevron-right" />
+                <ChevronRight size={24} />
               </Box>
             ),
           },

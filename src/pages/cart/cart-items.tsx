@@ -6,7 +6,8 @@ import React, { FC, useState } from "react";
 import { useRecoilState } from "recoil";
 import { cartState } from "state";
 import { CartItem } from "types/cart";
-import { Box, Text, Icon } from "zmp-ui";
+import { Box, Text } from "zmp-ui";
+import { Trash2, Plus, Minus, Inbox } from "lucide-react";
 
 export const CartItems: FC = () => {
   const [cart, setCart] = useRecoilState(cartState);
@@ -75,9 +76,9 @@ export const CartItems: FC = () => {
                       onClick={() => updateQuantity(item, item.quantity - 1)}
                     >
                       {item.quantity === 1 ? (
-                        <Icon icon="zi-close" size={14} className="text-red-500" />
+                        <Trash2 size={14} className="text-red-500" />
                       ) : (
-                        <div className="w-2.5 h-[1.5px] bg-gray-600" />
+                        <Minus size={14} className="text-gray-600" />
                       )}
                     </Box>
                     <Text size="small" className="font-bold text-gray-800 min-w-[16px] text-center">
@@ -87,7 +88,7 @@ export const CartItems: FC = () => {
                       className="w-7 h-7 flex items-center justify-center active:opacity-50 cursor-pointer"
                       onClick={() => updateQuantity(item, item.quantity + 1)}
                     >
-                      <Icon icon="zi-plus" size={14} className="text-primary" />
+                      <Plus size={14} className="text-primary" />
                     </Box>
                   </Box>
                 </Box>
@@ -101,7 +102,7 @@ export const CartItems: FC = () => {
       ) : (
         <Box className="flex flex-col items-center justify-center py-16 px-4">
           <Box className="w-24 h-24 bg-surfaceVariant rounded-full flex items-center justify-center mb-4">
-            <Icon icon="zi-inbox" size={40} className="text-gray-400" />
+            <Inbox size={40} className="text-gray-400" />
           </Box>
           <Text.Title size="small" className="text-gray-500 mb-2 text-center font-bold">
             Giỏ hàng trống
