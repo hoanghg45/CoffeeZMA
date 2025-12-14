@@ -130,9 +130,8 @@ export const subtotalState = selector({
 export const totalPriceState = selector({
   key: "totalPrice",
   get: ({ get }) => {
-    const subtotal = get(subtotalState);
-    const deliveryFee = get(calculatedDeliveryFeeState);
-    return subtotal + deliveryFee;
+    const breakdown = get(priceBreakdownState);
+    return breakdown.finalPrice;
   },
 });
 

@@ -23,7 +23,13 @@ export const Categories: FC = () => {
           onClick={() => gotoCategory(category.id)}
           className="flex flex-col space-y-2 items-center"
         >
-          <img className="w-12 h-12" src={category.icon} />
+          {category.icon.startsWith("http") || category.icon.startsWith("/") ? (
+            <img className="w-12 h-12" src={category.icon} />
+          ) : (
+            <div className="w-12 h-12 flex items-center justify-center text-3xl">
+              {category.icon}
+            </div>
+          )}
           <Text size="xxSmall" className="text-gray">
             {category.name}
           </Text>
