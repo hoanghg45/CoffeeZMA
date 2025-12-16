@@ -44,23 +44,34 @@ export const userState = selector({
 export const customerProfileState = selector<CustomerProfile | null>({
   key: "customerProfile",
   get: async ({ get }) => {
-    const user = get(userState);
-    if (!user) return null;
+    try {
+      const user = get(userState);
+      if (!user || !user.id) {
+        console.warn("[customerProfileState] No user available");
+        return null;
+      }
 
-    // Try to get existing customer
-    let customer = await getCustomerByZaloId(user.id);
+      console.log("[customerProfileState] Loading profile for user:", user.id);
 
-    // If not found, we might want to create them now or defer. 
-    // The previous logic `ensureUserExists` does a similar thing but for a different table (maybe?).
-    // The plan said "calls getOrCreateCustomerProfile to upsert customer rows".
-    // Let's ensure they exist here if not found, to have a consistent profile.
-    if (!customer) {
-      customer = await createCustomer(user.id, user.name, user.avatar);
+      // Try to get existing customer
+      let customer = await getCustomerByZaloId(user.id);
+
+      // If not found, create them
+      if (!customer) {
+        console.log("[customerProfileState] Creating new customer");
+        customer = await createCustomer(user.id, user.name, user.avatar);
+      }
+
+      console.log("[customerProfileState] Profile loaded:", customer);
+      return customer;
+    } catch (error) {
+      console.error("[customerProfileState] Error loading profile:", error);
+      // Return null instead of throwing to prevent blocking the UI
+      return null;
     }
-
-    return customer;
   },
 });
+
 
 export const loyaltyPromptState = atom<boolean>({
   key: "loyaltyPrompt",

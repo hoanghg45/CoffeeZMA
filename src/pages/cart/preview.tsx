@@ -1,15 +1,13 @@
 import { DisplayPrice } from "components/display/price";
 import React, { FC, useState } from "react";
-import { useRecoilValue, useRecoilValueLoadable, useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilValue, useRecoilValueLoadable, useRecoilState } from "recoil";
 import {
   totalPriceState,
   totalQuantityState,
   priceBreakdownState,
   calculatedDeliveryFeeState,
   customerProfileState,
-  loyaltyPromptState,
-  requestPhoneTriesState,
-  phoneState
+  loyaltyPromptState
 } from "state";
 import pay from "utils/product";
 import { Box, Button, Text, useSnackbar } from "zmp-ui";
@@ -24,8 +22,6 @@ export const CartPreview: FC = () => {
   const customerProfileLoadable = useRecoilValueLoadable(customerProfileState);
 
   const [loyaltyDismissed] = useRecoilState(loyaltyPromptState);
-  const setRequestPhoneTries = useSetRecoilState(requestPhoneTriesState);
-  const phoneLoadable = useRecoilValueLoadable(phoneState);
 
   const [loyaltySheetVisible, setLoyaltySheetVisible] = useState(false);
   const { openSnackbar } = useSnackbar();
@@ -40,27 +36,38 @@ export const CartPreview: FC = () => {
   const deliveryFee = deliveryFeeLoadable.state === "hasValue" ? deliveryFeeLoadable.contents : 0;
   const breakdown = breakdownLoadable.state === "hasValue" ? breakdownLoadable.contents : { subtotal: 0, discount: 0 };
   const customerProfile = customerProfileLoadable.state === "hasValue" ? customerProfileLoadable.contents : null;
-  const phone = phoneLoadable.state === "hasValue" ? phoneLoadable.contents : false;
 
-  const handleCheckout = () => {
-    // 1. Ensure phone number
-    if (!phone) {
-      setRequestPhoneTries((prev) => prev + 1);
-      // If we just requested, we might need to wait or the user interacts with Zalo prompt.
-      // Since phoneState is a selector that triggers the prompt, accessing it (or triggering retry) might show it.
-      // However, usually we might want to stop here and let the user accept.
-      // If the selector is async, we might be in a weird state. 
-      // For now, let's assume if !phone we request and return.
+  const handleCheckout = async () => {
+    // Check if still loading profile
+    if (customerProfileLoadable.state === "loading") {
+      openSnackbar({
+        type: "loading",
+        text: "Đang tải thông tin...",
+        duration: 2000,
+      });
       return;
     }
 
-    // 2. Check Loyalty
+    // Check for errors in customer profile
+    if (customerProfileLoadable.state === "hasError") {
+      console.error("Customer profile error:", customerProfileLoadable.contents);
+      openSnackbar({
+        type: "error",
+        text: "Không thể tải thông tin khách hàng",
+        duration: 3000,
+      });
+      // Still proceed to payment without loyalty - don't block checkout
+      pay(totalPrice);
+      return;
+    }
+
+    // Check Loyalty - only if we have a valid customer profile
     if (customerProfile && !customerProfile.isLoyaltyMember && !loyaltyDismissed) {
       setLoyaltySheetVisible(true);
       return;
     }
 
-    // 3. Pay
+    // Proceed to payment
     pay(totalPrice);
   };
 
@@ -129,7 +136,7 @@ export const CartPreview: FC = () => {
         visible={loyaltySheetVisible}
         onClose={() => setLoyaltySheetVisible(false)}
         onContinue={handleLoyaltyContinue}
-        customerId={customerProfile?.id ?? 0}
+        customerId={customerProfile?.id ?? ""}
       />
     </Box>
   );

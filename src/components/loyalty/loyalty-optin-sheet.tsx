@@ -1,7 +1,7 @@
 import React, { FC, useState } from "react";
 import { Sheet, Button, Box, Text } from "zmp-ui";
-import { useRecoilState, useSetRecoilState } from "recoil";
-import { loyaltyPromptState, customerProfileState } from "state";
+import { useSetRecoilState } from "recoil";
+import { loyaltyPromptState } from "state";
 import { markCustomerAsLoyaltyMember } from "services/customer";
 import { User } from "lucide-react";
 
@@ -9,7 +9,7 @@ interface LoyaltyOptinSheetProps {
     visible: boolean;
     onClose: () => void;
     onContinue: () => void; // Called after join or skip
-    customerId: number;
+    customerId: string;
 }
 
 export const LoyaltyOptinSheet: FC<LoyaltyOptinSheetProps> = ({
