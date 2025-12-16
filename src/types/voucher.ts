@@ -31,6 +31,7 @@ export interface PriceBreakdown {
     discount: number;
     shippingFee: number;
     finalPrice: number;
+    earnedPoints?: number; // Potential points to be earned from this order
     voucher: Voucher | null;
     error: string | null;
 }

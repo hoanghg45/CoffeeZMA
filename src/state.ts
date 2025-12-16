@@ -18,6 +18,9 @@ import { estimateFee } from "services/ahamove";
 import { getUserAddresses, UserAddress, ensureUserExists } from "services/user";
 import { getBranches } from "services/branch";
 import { getVoucherByCode, validateVoucher } from "services/voucher";
+import { getCustomerByZaloId, createCustomer, CustomerProfile } from "services/customer";
+import { calculateEarnedPoints, calculateRedeemValue, canRedeem } from "utils/loyalty";
+import appConfig from "../app-config.json";
 
 export const userState = selector({
   key: "user",
@@ -36,6 +39,48 @@ export const userState = selector({
     });
     return userInfo;
   },
+});
+
+export const customerProfileState = selector<CustomerProfile | null>({
+  key: "customerProfile",
+  get: async ({ get }) => {
+    const user = get(userState);
+    if (!user) return null;
+
+    // Try to get existing customer
+    let customer = await getCustomerByZaloId(user.id);
+
+    // If not found, we might want to create them now or defer. 
+    // The previous logic `ensureUserExists` does a similar thing but for a different table (maybe?).
+    // The plan said "calls getOrCreateCustomerProfile to upsert customer rows".
+    // Let's ensure they exist here if not found, to have a consistent profile.
+    if (!customer) {
+      customer = await createCustomer(user.id, user.name, user.avatar);
+    }
+
+    return customer;
+  },
+});
+
+export const loyaltyPromptState = atom<boolean>({
+  key: "loyaltyPrompt",
+  default: false, // false = not dismissed (show if eligible), true = dismissed
+  effects: [
+    ({ setSelf, onSet }) => {
+      const saved = localStorage.getItem("loyaltyPromptDismissed");
+      if (saved != null) {
+        setSelf(saved === "true");
+      }
+
+      onSet((newValue, _, isReset) => {
+        if (isReset) {
+          localStorage.removeItem("loyaltyPromptDismissed");
+        } else {
+          localStorage.setItem("loyaltyPromptDismissed", String(newValue));
+        }
+      });
+    },
+  ],
 });
 
 export const categoriesState = selector({
@@ -398,7 +443,18 @@ export const priceBreakdownState = selector<PriceBreakdownType>({
     const shippingFee = get(calculatedDeliveryFeeState);
     const { voucher, error } = get(voucherState);
 
-    return calculatePriceBreakdown(cart, voucher, shippingFee, error);
+    const breakdown = calculatePriceBreakdown(cart, voucher, shippingFee, error);
+
+    // Calculate earned points
+    // Note: ensure access to proper typing for appConfig if possible, otherwise rely on known structure
+    // appConfig.loyalty.earnPercent
+    const earnPercent = (appConfig as any).loyalty?.earnPercent || 0;
+    const earnedPoints = calculateEarnedPoints(breakdown.finalPrice, earnPercent);
+
+    return {
+      ...breakdown,
+      earnedPoints
+    };
   },
 });
 

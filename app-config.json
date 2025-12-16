@@ -29,5 +29,10 @@
         "prefixCurrencySymbol": false,
         "currencySymbol": "đ",
         "headerLogo": ""
+    },
+    "loyalty": {
+        "earnPercent": 0.05,
+        "redeemRate": 1,
+        "minRedeemPoints": 1000
     }
 }

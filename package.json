@@ -17,7 +17,8 @@
   "scripts": {
     "start": "zmp start",
     "deploy": "zmp deploy",
-    "build:css": "postcss src/css/tailwind.css -o src/css/styles.css"
+    "build:css": "postcss src/css/tailwind.css -o src/css/styles.css",
+    "test": "vitest"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
