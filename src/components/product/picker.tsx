@@ -120,7 +120,7 @@ export const ProductPicker: FC<ProductPickerProps> = ({
           visible={visible}
           onClose={() => setVisible(false)}
           autoHeight={false}
-          style={{ height: '85vh', maxHeight: '85vh' }}
+          style={{ height: '60vh', maxHeight: '85vh' }}
           mask
           handler
           swipeToClose
