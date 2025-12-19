@@ -1,20 +1,23 @@
 import { ElasticTextarea } from "components/elastic-textarea";
-import React, { FC, Suspense } from "react";
+import React, { FC, Suspense, useMemo } from "react";
 import { Box, Text } from "zmp-ui";
-import { Home, Clock, User, ChevronRight, FileText } from "lucide-react";
+import { Home, Clock, User, ChevronRight, FileText, AlertCircle, MapPin } from "lucide-react";
 import { RequestPersonPickerPhone } from "./person-picker";
 import { TimePicker } from "./time-picker";
-import { useRecoilState, useRecoilValueLoadable, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValueLoadable, useSetRecoilState, useRecoilValue } from "recoil";
 import {
   orderNoteState,
   calculatedDeliveryFeeState,
   selectedStoreState,
   phoneState,
-  requestPhoneTriesState
+  requestPhoneTriesState,
+  selectedAddressState,
+  selectedDeliveryTimeState
 } from "state";
 import { AddressPicker } from "components/address-picker";
 import { BranchPicker } from "components/branch-picker";
 import { VoucherPicker } from "components/voucher-picker";
+import { validateCheckoutFields } from "utils/checkout-validation";
 
 export const Delivery: FC = () => {
   const [note, setNote] = useRecoilState(orderNoteState);
@@ -25,10 +28,25 @@ export const Delivery: FC = () => {
   const phoneLoadable = useRecoilValueLoadable(phoneState);
   const retry = useSetRecoilState(requestPhoneTriesState);
 
+  // Required fields for validation
+  const selectedAddress = useRecoilValue(selectedAddressState);
+  const deliveryTime = useRecoilValue(selectedDeliveryTimeState);
+
   const deliveryFee = deliveryFeeLoadable.state === 'hasValue' ? deliveryFeeLoadable.contents : 0;
   const isFeeLoading = deliveryFeeLoadable.state === 'loading';
 
   const selectedStore = selectedStoreLoadable.state === 'hasValue' ? selectedStoreLoadable.contents : null;
+  const phone = phoneLoadable.state === 'hasValue' ? phoneLoadable.contents : false;
+
+  // Validate fields to show visual indicators
+  const validation = useMemo(() => {
+    return validateCheckoutFields(
+      selectedAddress,
+      phone,
+      selectedStore,
+      deliveryTime
+    );
+  }, [selectedAddress, phone, selectedStore, deliveryTime]);
 
   // Handle click for phone request - only clickable when phone is not available
   const handlePersonPickerClick = () => {
@@ -43,7 +61,23 @@ export const Delivery: FC = () => {
       <Box className="bg-surface rounded-md p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] space-y-4">
         {/* Address Selection */}
         <Suspense fallback={<Box className="p-4 flex justify-center"><Text className="text-gray-400">Đang tải địa chỉ...</Text></Box>}>
-          <AddressPicker />
+          <Box className="flex items-center space-x-3">
+            <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+              <MapPin className="text-yellow-600" size={20} />
+            </Box>
+            <Box flex className="flex-1 items-center justify-between">
+              <Box className="flex-1">
+                <AddressPicker hideIcon hideChevron />
+                {validation.missingFields.address && (
+                  <Box className="flex items-center gap-1.5 mt-2">
+                    <AlertCircle size={13} className="text-red-500 flex-shrink-0" />
+                    <Text size="xSmall" className="text-red-500">Vui lòng chọn địa chỉ giao hàng</Text>
+                  </Box>
+                )}
+              </Box>
+              <ChevronRight className="text-gray-400" size={20} />
+            </Box>
+          </Box>
         </Suspense>
 
         {/* Branch Selection (Source) */}
@@ -56,6 +90,12 @@ export const Delivery: FC = () => {
             <Suspense fallback={<Box className="p-2"><Text className="text-gray-400 text-sm">Đang tải cửa hàng...</Text></Box>}>
               <BranchPicker />
             </Suspense>
+            {validation.missingFields.store && (
+              <Box className="flex items-center gap-1.5 mt-2">
+                <AlertCircle size={13} className="text-red-500 flex-shrink-0" />
+                <Text size="xSmall" className="text-red-500">Vui lòng chọn cửa hàng</Text>
+              </Box>
+            )}
           </Box>
         </Box>
 
@@ -71,6 +111,12 @@ export const Delivery: FC = () => {
             <Box className="flex-1 space-y-[2px]">
               <Text size="small" className="font-bold text-gray-800">Thời gian nhận</Text>
               <TimePicker />
+              {validation.missingFields.time && (
+                <Box className="flex items-center gap-1.5 mt-2">
+                  <AlertCircle size={13} className="text-red-500 flex-shrink-0" />
+                  <Text size="xSmall" className="text-red-500">Vui lòng chọn thời gian nhận hàng</Text>
+                </Box>
+              )}
             </Box>
             <ChevronRight className="text-gray-400" size={20} />
           </Box>
@@ -89,9 +135,17 @@ export const Delivery: FC = () => {
             onClick={handlePersonPickerClick}
             style={{ cursor: phoneLoadable.state !== 'hasValue' || !phoneLoadable.contents ? 'pointer' : 'default' }}
           >
-            <Suspense fallback={<Text className="text-gray-400">Đang tải thông tin...</Text>}>
-              <RequestPersonPickerPhone />
-            </Suspense>
+            <Box className="flex-1">
+              <Suspense fallback={<Text className="text-gray-400">Đang tải thông tin...</Text>}>
+                <RequestPersonPickerPhone />
+              </Suspense>
+              {validation.missingFields.phone && (
+                <Box className="flex items-center gap-1.5 mt-2">
+                  <AlertCircle size={13} className="text-red-500 flex-shrink-0" />
+                  <Text size="xSmall" className="text-red-500">Vui lòng cung cấp số điện thoại</Text>
+                </Box>
+              )}
+            </Box>
             <ChevronRight className="text-gray-400" size={20} />
           </Box>
         </Box>

@@ -55,6 +55,7 @@ export const LoyaltyOptinSheet: FC<LoyaltyOptinSheetProps> = ({
             handler
             swipeToClose
             height="auto" // Adjust as needed
+            style={{ zIndex: 1000 }}
         >
             <Box className="p-6 flex flex-col items-center text-center space-y-4 pb-10">
                 <Box className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-2">

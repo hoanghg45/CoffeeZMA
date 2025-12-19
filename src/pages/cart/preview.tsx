@@ -7,12 +7,17 @@ import {
   priceBreakdownState,
   calculatedDeliveryFeeState,
   customerProfileState,
-  loyaltyPromptState
+  loyaltyPromptState,
+  selectedAddressState,
+  selectedStoreState,
+  phoneState,
+  selectedDeliveryTimeState
 } from "state";
 import pay from "utils/product";
 import { Box, Button, Text, useSnackbar } from "zmp-ui";
 import { ArrowRight } from "lucide-react";
 import { LoyaltyOptinSheet } from "components/loyalty/loyalty-optin-sheet";
+import { validateCheckoutFields, getFirstValidationError } from "utils/checkout-validation";
 
 export const CartPreview: FC = () => {
   const quantity = useRecoilValue(totalQuantityState);
@@ -20,6 +25,12 @@ export const CartPreview: FC = () => {
   const deliveryFeeLoadable = useRecoilValueLoadable(calculatedDeliveryFeeState);
   const breakdownLoadable = useRecoilValueLoadable(priceBreakdownState);
   const customerProfileLoadable = useRecoilValueLoadable(customerProfileState);
+
+  // Required checkout fields
+  const selectedAddress = useRecoilValue(selectedAddressState);
+  const selectedStoreLoadable = useRecoilValueLoadable(selectedStoreState);
+  const phoneLoadable = useRecoilValueLoadable(phoneState);
+  const deliveryTime = useRecoilValue(selectedDeliveryTimeState);
 
   const [loyaltyDismissed] = useRecoilState(loyaltyPromptState);
 
@@ -30,14 +41,37 @@ export const CartPreview: FC = () => {
     totalPriceLoadable.state === "loading" ||
     deliveryFeeLoadable.state === "loading" ||
     breakdownLoadable.state === "loading" ||
-    customerProfileLoadable.state === "loading";
+    customerProfileLoadable.state === "loading" ||
+    selectedStoreLoadable.state === "loading" ||
+    phoneLoadable.state === "loading";
 
   const totalPrice = totalPriceLoadable.state === "hasValue" ? totalPriceLoadable.contents : 0;
   const deliveryFee = deliveryFeeLoadable.state === "hasValue" ? deliveryFeeLoadable.contents : 0;
   const breakdown = breakdownLoadable.state === "hasValue" ? breakdownLoadable.contents : { subtotal: 0, discount: 0 };
   const customerProfile = customerProfileLoadable.state === "hasValue" ? customerProfileLoadable.contents : null;
+  const selectedStore = selectedStoreLoadable.state === "hasValue" ? selectedStoreLoadable.contents : null;
+  const phone = phoneLoadable.state === "hasValue" ? phoneLoadable.contents : false;
+
+  // Validate checkout fields
+  const validation = validateCheckoutFields(
+    selectedAddress,
+    phone,
+    selectedStore,
+    deliveryTime
+  );
 
   const handleCheckout = async () => {
+    // Validate required fields first
+    if (!validation.isValid) {
+      const errorMessage = getFirstValidationError(validation);
+      openSnackbar({
+        type: "error",
+        text: errorMessage || "Vui lòng điền đầy đủ thông tin trước khi đặt hàng",
+        duration: 3000,
+      });
+      return;
+    }
+
     // Check if still loading profile
     if (customerProfileLoadable.state === "loading") {
       openSnackbar({
@@ -121,7 +155,7 @@ export const CartPreview: FC = () => {
       <Button
         type="highlight"
         variant="primary"
-        disabled={!quantity || isLoading}
+        disabled={!quantity || isLoading || !validation.isValid}
         fullWidth
         onClick={handleCheckout}
         className="rounded-full h-12 text-base font-bold shadow-md"

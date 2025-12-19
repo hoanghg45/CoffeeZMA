@@ -8,7 +8,12 @@ import { selectedAddressState, userAddressesState, userState, addressPickerVisib
 import { saveUserAddress, deleteUserAddress, UserAddress } from "../services/user";
 import { getCurrentLocation } from "../services/location";
 
-export const AddressPicker: FC = () => {
+interface AddressPickerProps {
+  hideIcon?: boolean;
+  hideChevron?: boolean;
+}
+
+export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideChevron = false }) => {
   const [visible, setVisible] = useRecoilState(addressPickerVisibleState);
   const addresses = useRecoilValue(userAddressesState); // Read-only
   const refreshAddresses = useRecoilRefresher_UNSTABLE(userAddressesState);
@@ -133,16 +138,20 @@ export const AddressPicker: FC = () => {
         className="flex items-center active:opacity-80"
         onClick={() => setVisible(true)}
       >
-        <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-2">
-          <MapPin className="text-yellow-600" size={20} />
-        </Box>
+        {!hideIcon && (
+          <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-2">
+            <MapPin className="text-yellow-600" size={20} />
+          </Box>
+        )}
         <Box className="flex-1 min-w-0">
           <Text.Title size="small" className="font-bold truncate">{selectedAddress?.name || "Chọn địa chỉ"}</Text.Title>
           <Text size="xSmall" className="text-gray-500 line-clamp-2 break-words">
             {selectedAddress?.address || "Vui lòng chọn địa chỉ giao hàng"}
           </Text>
         </Box>
-        <ChevronRight size={20} className="text-gray-400 ml-2" />
+        {!hideChevron && (
+          <ChevronRight size={20} className="text-gray-400 ml-2" />
+        )}
       </Box>
 
       <Sheet
