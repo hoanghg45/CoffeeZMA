@@ -41,29 +41,34 @@ const convertPhoneToken = async (token: string): Promise<string | null> => {
       return null;
     }
 
-    // Get backend URL from environment (Vercel serverless function)
-    const backendUrl = import.meta.env.VITE_API_URL;
+    // Get N8N webhook URL from environment
+    const n8nWebhook = import.meta.env.VITE_N8N_WEBHOOK_PHONE;
 
-    if (!backendUrl) {
+    if (!n8nWebhook) {
       console.error(
-        "❌ VITE_API_URL not configured. " +
-        "Please set VITE_API_URL in your .env file to your Vercel deployment URL. " +
-        "Example: VITE_API_URL=https://your-app.vercel.app"
+        "❌ No N8N webhook configured. " +
+        "Please set VITE_N8N_WEBHOOK_PHONE in your .env file."
       );
       return null;
     }
 
-    // Call Vercel serverless function to convert token
-    // This avoids CORS issues and keeps secret key secure on the server
-    const response = await fetch(`${backendUrl}/api/user/getphone`, {
-      method: "POST",
+    // Use N8N Webhook for phone number conversion
+    const fetchUrl = n8nWebhook;
+    const method = "POST";
+    const body = {
+      token,
+      accessToken,
+    };
+
+    console.log("📞 Using N8N Webhook for phone number conversion");
+
+    // Call server to convert token
+    const response = await fetch(fetchUrl, {
+      method: method,
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        token,
-        accessToken,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -77,16 +82,40 @@ const convertPhoneToken = async (token: string): Promise<string | null> => {
       return null;
     }
 
-    const data = await response.json();
+    const responseData = await response.json();
+    console.log("📞 Raw phone number response:", responseData);
 
-    if (data.number) {
-      return data.number;
+    let phoneNumber: string | null = null;
+
+    // Handle N8N array format: [{"data": { "number": "..." }}]
+    if (Array.isArray(responseData) && responseData.length > 0) {
+      const item = responseData[0];
+      if (item.data && item.data.number) {
+        phoneNumber = item.data.number;
+      } else if (item.number) {
+        // Case: [{"number": "..."}]
+        phoneNumber = item.number;
+      }
+    }
+    // Handle N8N object format with data wrapper: {"data": { "number": "..." }}
+    else if (responseData.data && responseData.data.number) {
+      phoneNumber = responseData.data.number;
+    }
+    // Handle flat format: {"number": "..."}
+    else if (responseData.number) {
+      phoneNumber = responseData.number;
     }
 
-    console.warn("Invalid phone number data received from server:", data);
+    if (phoneNumber) {
+      console.log(`✅ Parsed phone number: ${phoneNumber}`);
+      return phoneNumber;
+    }
+
+    console.warn("Invalid phone number data received from server:", responseData);
     return null;
   } catch (error) {
-    console.error("Error converting phone token:", error);
+    console.error("❌ Phone Number Conversion Failed:", error);
+    console.info("💡 Make sure VITE_N8N_WEBHOOK_PHONE is set correctly");
     return null;
   }
 };

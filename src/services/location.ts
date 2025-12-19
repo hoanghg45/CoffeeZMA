@@ -70,39 +70,26 @@ const convertLocationToken = async (token: string): Promise<LocationCoordinates 
       return null;
     }
 
-    // Get backend URL from environment (Vercel serverless function or N8N Webhook)
-    const backendUrl = import.meta.env.VITE_API_URL;
-    const n8nWebhook = import.meta.env.VITE_N8N_WEBHOOK;
+    // Get N8N webhook URL from environment
+    const n8nWebhook = import.meta.env.VITE_N8N_WEBHOOK_LOCATION;
 
-    if (!backendUrl && !n8nWebhook) {
+    if (!n8nWebhook) {
       console.error(
-        "❌ No API URL configured. " +
-        "Please set VITE_API_URL or VITE_N8N_WEBHOOK in your .env file."
+        "❌ No N8N webhook configured. " +
+        "Please set VITE_N8N_WEBHOOK_LOCATION in your .env file."
       );
       return null;
     }
 
-    let fetchUrl = "";
-    let method = "POST";
-    let body = {};
+    // Use N8N Webhook for location conversion
+    const fetchUrl = n8nWebhook;
+    const method = "POST";
+    const body = {
+      token,
+      accessToken,
+    };
 
-    if (n8nWebhook) {
-      // Use N8N Webhook directly
-      fetchUrl = n8nWebhook;
-      // N8N usually expects the data directly in the body
-      body = {
-        token,
-        accessToken,
-      };
-      console.log("📍 Using N8N Webhook for location conversion");
-    } else {
-      // Use Vercel Proxy
-      fetchUrl = `${backendUrl}/api/location/convert`;
-      body = {
-        token,
-        accessToken,
-      };
-    }
+    console.log("📍 Using N8N Webhook for location conversion");
 
     // Call server to convert token
     const response = await fetch(fetchUrl, {
@@ -165,7 +152,7 @@ const convertLocationToken = async (token: string): Promise<LocationCoordinates 
     return null;
   } catch (error) {
     console.error("❌ Location Conversion Failed:", error);
-    console.info("💡 Make sure VITE_API_URL is set to your Vercel deployment URL");
+    console.info("💡 Make sure VITE_N8N_WEBHOOK_LOCATION is set correctly");
     return null;
   }
 };

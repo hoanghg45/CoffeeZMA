@@ -2,6 +2,7 @@ import React, { FC, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useRecoilRefresher_UNSTABLE } from "recoil";
 import { Box, Button, Input, Text } from "zmp-ui";
 import { MapPin, ChevronRight, Plus, Edit, Trash2, X, Bookmark, Phone } from "lucide-react";
+import { formatPhoneNumber } from "utils/phone";
 import { Sheet } from "./fullscreen-sheet";
 import { createPortal } from "react-dom";
 import { selectedAddressState, userAddressesState, userState, addressPickerVisibleState, addressEditingState } from "../state";
@@ -221,7 +222,7 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
                           )}
                         </Box>
                         <Text size="xSmall" className="text-gray-600 mb-1 line-clamp-2">{addr.address}</Text>
-                        <Text size="xSmall" className="text-gray-500">{addr.phone}</Text>
+                        <Text size="xSmall" className="text-gray-500">{formatPhoneNumber(addr.phone)}</Text>
                       </Box>
                     </Box>
 
