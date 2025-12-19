@@ -40,16 +40,12 @@ ZALO_APP_SECRET_KEY=your_secret_key_here
 Add the N8N webhook URL to your `.env` file:
 
 ```env
-# Specific webhook for phone number conversion
+# Phone number conversion webhook (required)
 VITE_N8N_WEBHOOK_PHONE=https://your-n8n-instance.com/webhook/user/convert
-
-# Optional: Generic webhook (fallback for backward compatibility)
-# VITE_N8N_WEBHOOK=https://your-n8n-instance.com/webhook/user/convert
 ```
 
 **Note:** 
-- `VITE_N8N_WEBHOOK_PHONE` is the preferred variable for phone number conversion
-- For backward compatibility, `VITE_N8N_WEBHOOK` can be used as a fallback
+- `VITE_N8N_WEBHOOK_PHONE` is required for phone number conversion
 - **N8N webhook is required** - Vercel serverless function support has been removed
 
 ## How It Works

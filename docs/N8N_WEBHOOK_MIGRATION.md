@@ -52,43 +52,43 @@ Make sure you have both workflows set up in N8N:
    - Request phone number permission
    - Verify phone number is displayed correctly
 
-## Backward Compatibility
+## Configuration
 
-For backward compatibility, the code still supports the generic `VITE_N8N_WEBHOOK` variable as a fallback:
+Each service requires its own specific webhook variable:
 
-- **Location service**: Uses `VITE_N8N_WEBHOOK_LOCATION` first, falls back to `VITE_N8N_WEBHOOK` if not set
-- **Phone service**: Uses `VITE_N8N_WEBHOOK_PHONE` first, falls back to `VITE_N8N_WEBHOOK` if not set
+- **Location service**: Requires `VITE_N8N_WEBHOOK_LOCATION`
+- **Phone service**: Requires `VITE_N8N_WEBHOOK_PHONE`
 
-However, **we recommend migrating to the specific variables** to avoid conflicts.
+No fallback is provided - each service must have its own webhook configured.
 
-## Priority Order
+## Required Configuration
 
-Each service checks environment variables in this order:
+Each service requires its own specific webhook:
 
 ### Location Service
-1. `VITE_N8N_WEBHOOK_LOCATION` (preferred)
-2. `VITE_N8N_WEBHOOK` (fallback)
+- **Required**: `VITE_N8N_WEBHOOK_LOCATION`
 
 ### Phone Number Service
-1. `VITE_N8N_WEBHOOK_PHONE` (preferred)
-2. `VITE_N8N_WEBHOOK` (fallback)
+- **Required**: `VITE_N8N_WEBHOOK_PHONE`
 
-**Note:** Vercel serverless function support has been removed. Only N8N webhooks are supported.
+**Note:** 
+- Each service requires its own webhook - no fallback is provided
+- Vercel serverless function support has been removed
+- Only N8N webhooks are supported
 
 ## Example Configuration
 
 ```env
-# N8N Webhooks (required - specific per service)
+# Location conversion webhook (required)
 VITE_N8N_WEBHOOK_LOCATION=https://n8n.r2.coool.cafe/webhook/location/convert
-VITE_N8N_WEBHOOK_PHONE=https://n8n.r2.coool.cafe/webhook/user/convert
 
-# Optional: Generic webhook (fallback for backward compatibility)
-# VITE_N8N_WEBHOOK=https://n8n.r2.coool.cafe/webhook/generic
+# Phone number conversion webhook (required)
+VITE_N8N_WEBHOOK_PHONE=https://n8n.r2.coool.cafe/webhook/user/convert
 ```
 
 **Important Notes:**
-- At least one webhook must be configured for each service
-- Either use specific webhooks (`VITE_N8N_WEBHOOK_LOCATION` and `VITE_N8N_WEBHOOK_PHONE`) or the generic webhook (`VITE_N8N_WEBHOOK`)
+- Both webhooks are required - no fallback is provided
+- Each service uses its own specific webhook variable
 - **Vercel serverless function support has been removed** - only N8N webhooks are supported
 
 ## Troubleshooting
@@ -117,11 +117,11 @@ VITE_N8N_WEBHOOK_LOCATION=https://n8n.r2.coool.cafe/webhook/location/convert
 VITE_N8N_WEBHOOK_PHONE=https://n8n.r2.coool.cafe/webhook/user/convert
 ```
 
-### Issue: Both services using the same webhook
+### Issue: Service not working
 
-**Cause:** You're still using `VITE_N8N_WEBHOOK` instead of the specific variables.
+**Cause:** Missing required webhook configuration.
 
-**Solution:** Migrate to specific variables as shown in Step 1.
+**Solution:** Ensure both `VITE_N8N_WEBHOOK_LOCATION` and `VITE_N8N_WEBHOOK_PHONE` are set in your `.env` file.
 
 ## Benefits of Separate Variables
 

@@ -14,7 +14,7 @@ Removed all Vercel serverless function support from the codebase. The applicatio
 - Vercel-specific error messages
 
 **Kept:**
-- N8N webhook support (`VITE_N8N_WEBHOOK_LOCATION` or `VITE_N8N_WEBHOOK`)
+- N8N webhook support (`VITE_N8N_WEBHOOK_LOCATION` - required)
 - Clean error handling
 - Response format parsing
 
@@ -26,7 +26,7 @@ Removed all Vercel serverless function support from the codebase. The applicatio
 - Vercel-specific error messages
 
 **Kept:**
-- N8N webhook support (`VITE_N8N_WEBHOOK_PHONE` or `VITE_N8N_WEBHOOK`)
+- N8N webhook support (`VITE_N8N_WEBHOOK_PHONE` - required)
 - Clean error handling
 - Response format parsing
 
@@ -42,18 +42,12 @@ VITE_N8N_WEBHOOK_LOCATION=https://n8n.r2.coool.cafe/webhook/location/convert
 VITE_N8N_WEBHOOK_PHONE=https://n8n.r2.coool.cafe/webhook/user/convert
 ```
 
-### Optional (Backward Compatibility)
-
-```env
-# Generic webhook (fallback if specific webhooks not set)
-VITE_N8N_WEBHOOK=https://n8n.r2.coool.cafe/webhook/generic
-```
-
 ### Removed
 
 ```env
 # ❌ No longer supported
 # VITE_API_URL=https://your-app.vercel.app
+# VITE_N8N_WEBHOOK=https://n8n.r2.coool.cafe/webhook/generic
 ```
 
 ## Code Structure
@@ -77,8 +71,8 @@ if (n8nWebhook) {
 
 ### After
 ```typescript
-// Simple, clean logic
-const n8nWebhook = import.meta.env.VITE_N8N_WEBHOOK_LOCATION || import.meta.env.VITE_N8N_WEBHOOK;
+// Simple, clean logic - one webhook, one purpose
+const n8nWebhook = import.meta.env.VITE_N8N_WEBHOOK_LOCATION;
 
 if (!n8nWebhook) {
   // Error...
