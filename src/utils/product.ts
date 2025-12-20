@@ -1,4 +1,5 @@
 import { createOrder } from "zmp-sdk";
+import { Payment } from "zmp-sdk/apis";
 import { Option, Product } from "types/product";
 import { getConfig } from "./config";
 import { SelectedOptions } from "types/cart";
@@ -79,20 +80,38 @@ export function isIdentical(
   return true;
 }
 
-const pay = (amount: number, description?: string) =>
-  createOrder({
-    desc:
-      description ??
-      `Thanh toán cho ${getConfig((config) => config.app.title)}`,
-    item: [],
-    amount: amount,
-    success: (data) => {
-      console.log("Payment success: ", data);
-    },
-    fail: (err) => {
-      console.log("Payment error: ", err);
-    },
-    mac: "1234567890",///test
-  });
+const pay = async (amount: number, description?: string) => {
+  try {
+    const { method } = await Payment.selectPaymentMethod({
+      channels: [
+        { method: "ZALOPAY_SANDBOX" },
+        { method: "COD" },
+        { method: "BANK_SANDBOX" },
+      ],
+    });
+
+    if (method === "ZALOPAY_SANDBOX") {
+      createOrder({
+        desc:
+          description ??
+          `Thanh toán cho ${getConfig((config) => config.app.title)}`,
+        item: [],
+        amount: amount,
+        success: (data) => {
+          console.log("Payment success: ", data);
+        },
+        fail: (err) => {
+          console.log("Payment error: ", err);
+        },
+        mac: "1234567890", //test
+      });
+    } else if (method === "COD" || method === "BANK_SANDBOX") {
+      // Mock success for other methods for now
+      console.log(`Payment success via ${method}`);
+    }
+  } catch (error) {
+    console.log("Payment selection error or cancelled: ", error);
+  }
+};
 
 export default pay;
