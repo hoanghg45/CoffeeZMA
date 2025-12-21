@@ -70,7 +70,7 @@ export function isIdentical(
       Array.isArray(option1Value) &&
       Array.isArray(option2Value) &&
       [...option1Value].sort().toString() ===
-        [...option2Value].sort().toString();
+      [...option2Value].sort().toString();
 
     if (option1Value !== option2Value && !areEqual) {
       return false;
@@ -80,9 +80,14 @@ export function isIdentical(
   return true;
 }
 
-const pay = async (amount: number, description?: string) => {
+import { Cart } from "types/cart";
+
+// ... imports
+
+const pay = async (amount: number, cart: Cart, description?: string) => {
   try {
-    const { method } = await Payment.selectPaymentMethod({
+    // 1. Select Payment Method
+    const { method, isCustom } = await Payment.selectPaymentMethod({
       channels: [
         { method: "ZALOPAY_SANDBOX" },
         { method: "COD" },
@@ -90,27 +95,101 @@ const pay = async (amount: number, description?: string) => {
       ],
     });
 
-    if (method === "ZALOPAY_SANDBOX") {
+    if (!method) return;
+
+    // 2. Prepare Items
+    // Ensure keys are stable for JSON.stringify ordering
+    const items = cart.map((item) => ({
+      id: String(item.product.id),
+      name: String(item.product.name),
+      price: Number(item.product.price),
+      quantity: Number(item.quantity),
+    }));
+
+    // Sanitized method object to ensure consistent stringify
+    const selectedMethod = method as any;
+    const methodObject = {
+      id: selectedMethod.id || selectedMethod, // Handle if method is object or string
+      isCustom: selectedMethod.isCustom || false
+    };
+
+    // 3. Prepare stable JSON strings for MAC and API
+    // Note: Zalo SDK requires method and extradata to be JSON strings if MAC is present.
+    // Item must be Array for SDK, but JSON String for MAC calculation.
+    const itemStr = JSON.stringify(items);
+    const methodStr = JSON.stringify(methodObject);
+    const extradataStr = JSON.stringify({ myId: "123" });
+
+    // 4. Call N8n Webhook to generate MAC
+    // Send strictly strings to ensure N8n hashes the exact same content
+    const macRequestPayload = {
+      amount: amount,
+      desc: description ?? `Thanh toán cho ${getConfig((config) => config.app.title)}`,
+      item: itemStr,
+      method: methodStr,
+      extradata: extradataStr,
+    };
+
+    console.log("Requesting MAC with payload:", macRequestPayload);
+
+    const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_MAC;
+    if (!webhookUrl) {
+      throw new Error("VITE_N8N_WEBHOOK_MAC is not defined in .env");
+    }
+
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(macRequestPayload),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get MAC: ${response.statusText}`);
+    }
+
+    const { mac } = await response.json();
+    console.log("Received MAC:", mac);
+
+    // 5. Create Order with Zalo SDK
+    const notifyUrl = import.meta.env.VITE_N8N_WEBHOOK_NOTIFY || webhookUrl; // Use specific notify webhook or fallback
+
+    return new Promise((resolve, reject) => {
       createOrder({
-        desc:
-          description ??
-          `Thanh toán cho ${getConfig((config) => config.app.title)}`,
-        item: [],
         amount: amount,
-        success: (data) => {
-          console.log("Payment success: ", data);
-        },
+        desc: macRequestPayload.desc,
+        item: items,        // SDK requires Array here
+        method: methodStr,  // SDK requires JSON String here
+        extradata: extradataStr, // SDK requires JSON String here
+        mac: mac,
+        // Important: notifyUrl is required if you haven't set it in Dashboard, 
+        // OR as a fail-safe to ensure Zalo knows where to call.
+        // However, Zalo docs say "Config in Dashboard". 
+        // But passing it here is often supported/safer for dynamic environments.
+        // If the type definition doesn't support it, we might need to cast or rely on Dashboard.
+        // Let's add it if the SDK allows, or rely on Dashboard if it errors.
+        // Checking Zalo docs: createOrder usually doesn't take notifyUrl as param, checking...
+        // Docs say: "Config in Dashboard". 
+        // But some integrations use it. Let's assume Dashboard is primary.
+        // The issue is likely the RESPONSE from N8n.
+        // I will NOT add it if it's not standard. 
+        // User's issue is likely the N8n response format.
+        // I will revert to just relying on Dashboard config and strictly checking N8n response.
         fail: (err) => {
           console.log("Payment error: ", err);
+          reject(err);
         },
-        mac: "1234567890", //test
+        success: (data) => {
+          console.log("Payment success: ", data);
+          resolve(data);
+        }
       });
-    } else if (method === "COD" || method === "BANK_SANDBOX") {
-      // Mock success for other methods for now
-      console.log(`Payment success via ${method}`);
-    }
+    });
+
   } catch (error) {
-    console.log("Payment selection error or cancelled: ", error);
+    console.log("Payment flow error: ", error);
+    throw error;
   }
 };
 

@@ -11,16 +11,18 @@ import {
   selectedAddressState,
   selectedStoreState,
   phoneState,
-  selectedDeliveryTimeState
+  selectedDeliveryTimeState,
+  cartState
 } from "state";
 import pay from "utils/product";
-import { Box, Button, Text, useSnackbar } from "zmp-ui";
+import { Box, Button, Text, useSnackbar, useNavigate } from "zmp-ui";
 import { ArrowRight } from "lucide-react";
 import { LoyaltyOptinSheet } from "components/loyalty/loyalty-optin-sheet";
 import { validateCheckoutFields, getFirstValidationError } from "utils/checkout-validation";
 
 export const CartPreview: FC = () => {
   const quantity = useRecoilValue(totalQuantityState);
+  const [cart, setCart] = useRecoilState(cartState);
   const totalPriceLoadable = useRecoilValueLoadable(totalPriceState);
   const deliveryFeeLoadable = useRecoilValueLoadable(calculatedDeliveryFeeState);
   const breakdownLoadable = useRecoilValueLoadable(priceBreakdownState);
@@ -36,6 +38,7 @@ export const CartPreview: FC = () => {
 
   const [loyaltySheetVisible, setLoyaltySheetVisible] = useState(false);
   const { openSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   const isLoading =
     totalPriceLoadable.state === "loading" ||
@@ -90,8 +93,8 @@ export const CartPreview: FC = () => {
         text: "Không thể tải thông tin khách hàng",
         duration: 3000,
       });
-      // Still proceed to payment without loyalty - don't block checkout
-      pay(totalPrice);
+      // Try payment anyway (optional fallback)
+      processPayment();
       return;
     }
 
@@ -102,13 +105,34 @@ export const CartPreview: FC = () => {
     }
 
     // Proceed to payment
-    pay(totalPrice);
+    processPayment();
+  };
+
+  const processPayment = async () => {
+    try {
+      await pay(totalPrice, cart);
+
+      // Payment Successful
+      setCart([]); // Clear cart
+      openSnackbar({
+        type: "success",
+        text: "Đặt hàng thành công! Cảm ơn bạn đã ủng hộ.",
+        duration: 3000,
+      });
+      navigate("/"); // Go back to Home
+    } catch (error) {
+      console.error("Payment failed", error);
+      openSnackbar({
+        type: "error",
+        text: "Thanh toán thất bại hoặc đã hủy. Vui lòng thử lại.",
+        duration: 3000,
+      });
+    }
   };
 
   const handleLoyaltyContinue = () => {
     setLoyaltySheetVisible(false);
-    // Proceed to pay after decision
-    pay(totalPrice);
+    processPayment();
   };
 
   return (
