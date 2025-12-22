@@ -37,8 +37,14 @@ export const useHandlePayment = () => {
   const navigate = useNavigate();
   useEffect(() => {
     events.on(EventName.OpenApp, (data) => {
+      console.log("OpenApp event received:", data);
       if (data?.path) {
         navigate(data?.path, {
+          state: data,
+        });
+      } else if (data?.appTransID || data?.orderId) {
+        // Fallback for COD/Bank where path might be missing but we have ID
+        navigate("/result", {
           state: data,
         });
       }

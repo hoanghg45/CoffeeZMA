@@ -33,7 +33,15 @@ const CheckoutResultPage: FC = () => {
     const check = () => {
       let data = state;
       if (data) {
-        if ("path" in data) {
+        if ("appTransID" in data || "orderId" in data) {
+          // Fix: Prioritize ID from OpenApp event data
+          data = {
+            appTransID: data.appTransID,
+            orderId: data.orderId
+          };
+        } else if ("path" in data) {
+          // Fallback: This might be a URL, which checkTransaction might not handle well,
+          // but keeping for legacy compatibility if ID is missing.
           data = data.path;
         } else if ("data" in data) {
           data = data.data;
