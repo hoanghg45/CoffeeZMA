@@ -1,4 +1,4 @@
-import { UserAddress } from "services/user";
+import { CustomerAddress } from "services/customer";
 import { Store } from "types/delivery";
 
 export interface CheckoutValidationResult {
@@ -16,7 +16,7 @@ export interface CheckoutValidationResult {
  * Validates all required checkout fields before proceeding to payment
  */
 export function validateCheckoutFields(
-  address: UserAddress | null,
+  address: CustomerAddress | null,
   phone: string | boolean,
   store: Store | null,
   deliveryTime: number | null

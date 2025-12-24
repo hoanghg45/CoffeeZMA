@@ -6,7 +6,7 @@ import { formatPhoneNumber } from "utils/phone";
 import { Sheet } from "./fullscreen-sheet";
 import { createPortal } from "react-dom";
 import { selectedAddressState, userAddressesState, userState, addressPickerVisibleState, addressEditingState } from "../state";
-import { saveUserAddress, deleteUserAddress, UserAddress } from "../services/user";
+import { saveCustomerAddress, deleteCustomerAddress, CustomerAddress } from "../services/customer";
 import { getCurrentLocation } from "../services/location";
 
 interface AddressPickerProps {
@@ -20,12 +20,12 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
   const refreshAddresses = useRecoilRefresher_UNSTABLE(userAddressesState);
   const [selectedAddress, setSelectedAddress] = useRecoilState(selectedAddressState);
   const [isEditing, setIsEditing] = useRecoilState(addressEditingState);
-  const [editingAddress, setEditingAddress] = useState<UserAddress | null>(null);
+  const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const user = useRecoilValue(userState);
 
   // Form State
-  const [form, setForm] = useState<Partial<UserAddress>>({
+  const [form, setForm] = useState<Partial<CustomerAddress>>({
     name: "",
     address: "",
     phone: "",
@@ -41,9 +41,9 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
   const handleSave = async () => {
     if (!form.name || !form.address || !form.phone) return;
 
-    const savedAddress = await saveUserAddress({
+    const savedAddress = await saveCustomerAddress({
       id: editingAddress?.id,
-      userId: user.id,
+      customerId: user.id, // User ID here is the Zalo/Customer ID
       name: form.name,
       address: form.address,
       lat: form.lat || editingAddress?.lat || 0,
@@ -69,7 +69,7 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
     }
   };
 
-  const handleEdit = (addr: UserAddress, e: React.MouseEvent) => {
+  const handleEdit = (addr: CustomerAddress, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingAddress(addr);
     setForm({
@@ -83,7 +83,7 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
   };
 
   const handleDelete = async (addressId: string) => {
-    const success = await deleteUserAddress(addressId, user.id);
+    const success = await deleteCustomerAddress(addressId, user.id);
     if (success) {
       // If deleted address was selected, clear selection
       // The useEffect will handle selecting a new default address after refresh
@@ -120,13 +120,25 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
         return;
       }
 
-      // Set coordinates - address will need to be filled manually or via reverse geocoding API
+
+      // Set coordinates and try to reverse geocode
+      let addressText = `Vị trí hiện tại: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+
+      try {
+        const { reverseGeocode } = await import("../services/mapbox");
+        const geocodedAddress = await reverseGeocode(latitude, longitude);
+        if (geocodedAddress) {
+          addressText = geocodedAddress;
+        }
+      } catch (err) {
+        console.error("Failed to reverse geocode:", err);
+      }
+
       setForm(prev => ({
         ...prev,
         lat: latitude,
         long: longitude,
-        // Populate address with coordinates so user can see and save immediately
-        address: `Vị trí hiện tại: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+        address: addressText
       }));
     } catch (error) {
       console.error("Error getting location:", error);
@@ -322,7 +334,7 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
                       </Box>
                       <Input
                         value={form.address || ""}
-                        onChange={(e) => setForm({ ...form, address: e.target.value })}
+                        onChange={(e) => setForm({ ...form, address: e.target.value, lat: 0, long: 0 })}
                         placeholder="Nhập địa chỉ chi tiết"
                         className="border-none px-0 bg-transparent text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none p-0 h-auto"
                       />

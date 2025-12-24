@@ -147,3 +147,167 @@ export const markCustomerAsLoyaltyMember = async (
         return false;
     }
 };
+
+// Address Interfaces & Logic - Migrated from user.ts
+export interface CustomerAddress {
+    id: string;
+    customerId: string;
+    name: string;
+    address: string;
+    lat: number;
+    long: number;
+    phone: string;
+    isDefault: boolean;
+}
+
+export const getCustomerAddresses = async (customerId: string): Promise<CustomerAddress[]> => {
+    try {
+        // Querying user_addresses table - treated as customer addresses
+        const { rows } = await pool.query(
+            `SELECT 
+        id, 
+        user_id as "customerId", 
+        name, 
+        address, 
+        lat, 
+        long, 
+        phone, 
+        is_default as "isDefault"
+      FROM user_addresses 
+      WHERE user_id = $1 
+      ORDER BY is_default DESC, created_at DESC`,
+            [customerId]
+        );
+
+        return rows.map(row => ({
+            ...row,
+            lat: Number(row.lat),
+            long: Number(row.long)
+        }));
+    } catch (error) {
+        console.error("[customer.ts] Error fetching customer addresses:", error);
+        return [];
+    }
+};
+
+export const saveCustomerAddress = async (address: Omit<CustomerAddress, 'id'> & { id?: string }): Promise<CustomerAddress | null> => {
+    try {
+        const client = await pool.connect();
+
+        // Auto-fill coordinates if missing using Mapbox Forward Geocoding
+        if ((!address.lat || !address.long) && address.address) {
+            try {
+                const { forwardGeocode } = await import("./mapbox");
+                const coords = await forwardGeocode(address.address);
+                if (coords) {
+                    console.log(`📍 [customer.ts] Resolved coordinates for "${address.address}":`, coords);
+                    address.lat = coords.lat;
+                    address.long = coords.long;
+                }
+            } catch (geoError) {
+                console.error("Geocoding failed:", geoError);
+            }
+        }
+
+        try {
+            await client.query('BEGIN');
+
+            if (address.isDefault) {
+                await client.query(
+                    'UPDATE user_addresses SET is_default = false WHERE user_id = $1',
+                    [address.customerId]
+                );
+            }
+
+            let result;
+            if (address.id) {
+                // Update
+                result = await client.query(
+                    `UPDATE user_addresses 
+           SET name = $1, address = $2, lat = $3, long = $4, phone = $5, is_default = $6, updated_at = NOW()
+           WHERE id = $7 AND user_id = $8
+           RETURNING id, user_id as "customerId", name, address, lat, long, phone, is_default as "isDefault"`,
+                    [address.name, address.address, address.lat, address.long, address.phone, address.isDefault, address.id, address.customerId]
+                );
+            } else {
+                // Create
+                const newId = `addr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                result = await client.query(
+                    `INSERT INTO user_addresses (id, user_id, name, address, lat, long, phone, is_default)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+           RETURNING id, user_id as "customerId", name, address, lat, long, phone, is_default as "isDefault"`,
+                    [newId, address.customerId, address.name, address.address, address.lat, address.long, address.phone, address.isDefault]
+                );
+            }
+
+            await client.query('COMMIT');
+
+            const row = result.rows[0];
+            return {
+                ...row,
+                lat: Number(row.lat),
+                long: Number(row.long)
+            };
+        } catch (e) {
+            await client.query('ROLLBACK');
+            throw e;
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error("[customer.ts] Error saving customer address:", error);
+        return null;
+    }
+};
+
+export const deleteCustomerAddress = async (addressId: string, customerId: string): Promise<boolean> => {
+    try {
+        const client = await pool.connect();
+
+        try {
+            await client.query('BEGIN');
+
+            const checkResult = await client.query(
+                'SELECT is_default FROM user_addresses WHERE id = $1 AND user_id = $2',
+                [addressId, customerId]
+            );
+
+            if (checkResult.rows.length === 0) {
+                await client.query('ROLLBACK');
+                return false;
+            }
+
+            const isDefault = checkResult.rows[0].is_default;
+
+            const deleteResult = await client.query(
+                'DELETE FROM user_addresses WHERE id = $1 AND user_id = $2 RETURNING id',
+                [addressId, customerId]
+            );
+
+            if (isDefault && deleteResult.rows.length > 0) {
+                const remainingResult = await client.query(
+                    'SELECT id FROM user_addresses WHERE user_id = $1 ORDER BY created_at ASC LIMIT 1',
+                    [customerId]
+                );
+
+                if (remainingResult.rows.length > 0) {
+                    await client.query(
+                        'UPDATE user_addresses SET is_default = true WHERE id = $1',
+                        [remainingResult.rows[0].id]
+                    );
+                }
+            }
+
+            await client.query('COMMIT');
+            return true;
+        } catch (e) {
+            await client.query('ROLLBACK');
+            throw e;
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error("[customer.ts] Error deleting customer address:", error);
+        return false;
+    }
+};

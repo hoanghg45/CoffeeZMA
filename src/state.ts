@@ -15,10 +15,10 @@ import { getCategories } from "services/category";
 import { getProducts } from "services/product";
 import { getVariants } from "services/variant";
 import { estimateFee } from "services/ahamove";
-import { getUserAddresses, UserAddress, ensureUserExists } from "services/user";
+
 import { getBranches } from "services/branch";
 import { getVoucherByCode, validateVoucher } from "services/voucher";
-import { getCustomerByZaloId, createCustomer, CustomerProfile } from "services/customer";
+import { getCustomerByZaloId, createCustomer, CustomerProfile, getCustomerAddresses, CustomerAddress } from "services/customer";
 import { calculateEarnedPoints, calculateRedeemValue, canRedeem } from "utils/loyalty";
 import appConfig from "../app-config.json";
 
@@ -31,12 +31,8 @@ export const userState = selector({
       throw new Error("Failed to get user info");
     }
 
-    // Ensure user exists in DB
-    await ensureUserExists({
-      id: userInfo.id,
-      name: userInfo.name,
-      avatar: userInfo.avatar
-    });
+    // Removed ensureUserExists - we don't want to create 'STAFF' users for customers anymore
+    // The customerProfileState will handle creating 'Customer' records
     return userInfo;
   },
 });
@@ -485,7 +481,7 @@ export const deliveryModeState = atom<"delivery">({
   default: "delivery",
 });
 
-export const selectedAddressState = atom<UserAddress | null>({
+export const selectedAddressState = atom<CustomerAddress | null>({
   key: "selectedAddress",
   default: null,
 });
@@ -505,11 +501,12 @@ export const voucherPickerVisibleState = atom({
   default: false,
 });
 
-export const userAddressesState = selector<UserAddress[]>({
+export const userAddressesState = selector<CustomerAddress[]>({
   key: "userAddresses",
   get: async ({ get }) => {
     const user = get(userState);
-    return await getUserAddresses(user.id);
+    // Use the customer service to get addresses now
+    return await getCustomerAddresses(user.id);
   },
 });
 
