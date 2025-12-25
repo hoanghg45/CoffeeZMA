@@ -101,7 +101,9 @@ const CheckoutResultPage: FC = () => {
 
   const clearCart = useResetRecoilState(cartState);
   useEffect(() => {
-    if (paymentResult?.resultCode >= 0) {
+    // Only clear cart if payment is strictly SUCCESS (1).
+    // Do not clear on Pending (0) or Fail (-1) to allow retry.
+    if (paymentResult?.resultCode === 1) {
       clearCart();
     }
   }, [paymentResult]);

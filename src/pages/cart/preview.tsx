@@ -113,11 +113,8 @@ export const CartPreview: FC = () => {
       const result = await pay(totalPrice, cart);
       console.log("Payment flow finished. Result:", result);
 
-      // Payment returned successful result (orderId).
-      // Navigate to Result page instantly to verify transaction.
-      navigate("/result", {
-        state: result,
-      });
+      // Note: Do NOT clear cart or navigate here.
+      // Payment flow is async. Success is handled via OpenApp event -> /result page.
     } catch (error) {
       console.error("Payment failed", error);
       openSnackbar({
