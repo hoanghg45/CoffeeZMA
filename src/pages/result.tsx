@@ -4,6 +4,8 @@ import {
   AsyncCallbackFailObject,
   CheckTransactionReturns,
   Payment,
+  events,
+  EventName,
 } from "zmp-sdk";
 import { useLocation } from "react-router";
 import { useResetRecoilState } from "recoil";
@@ -30,46 +32,70 @@ const CheckoutResultPage: FC = () => {
   useEffect(() => {
     let timeout;
 
-    const check = () => {
+    const check = (eventData?: any) => {
       let data = state;
-      if (data) {
+
+      // 1. Priority: Event Data (from OpenApp event)
+      if (eventData && eventData.path) {
+        // Extract query params from path
+        const queryString = eventData.path.split('?')[1];
+        if (queryString) {
+          data = queryString;
+          console.log("Using OpenApp data:", data);
+        }
+      }
+      // 2. Fallback: State (if valid)
+      else if (data) {
         if ("appTransID" in data || "orderId" in data) {
-          // Fix: Prioritize ID from OpenApp event data
           data = {
             appTransID: data.appTransID,
             orderId: data.orderId
           };
         } else if ("path" in data) {
-          // Fallback: This might be a URL, which checkTransaction might not handle well,
-          // but keeping for legacy compatibility if ID is missing.
           data = data.path;
         } else if ("data" in data) {
           data = data.data;
         }
-      } else {
+      }
+      // 3. Fallback: Current URL Query Params
+      else {
         data = window.location.search.slice(1);
       }
+
+      console.log("Checking transaction with data:", data);
+
+      if (!data) {
+        console.warn("No data for checkTransaction");
+        return;
+      }
+
       Payment.checkTransaction({
         data,
         success: (rs) => {
-          // Kết quả giao dịch khi gọi api thành công
           setPaymentResult(rs);
           if (rs.resultCode === 0) {
-            // Thanh toán đang được xử lý
-            timeout = setTimeout(check, 3000);
+            timeout = setTimeout(() => check(eventData), 3000);
           }
         },
         fail: (err) => {
-          // Kết quả giao dịch khi gọi api thất bại
           setPaymentResult(err);
         },
       });
     };
 
+    // Initial check (in case we already have params)
     check();
+
+    // Listen for OpenApp event (when payment closes)
+    const onOpenApp = (data) => {
+      console.log("OpenApp event received:", data);
+      check(data);
+    };
+    events.on(EventName.OpenApp, onOpenApp);
 
     return () => {
       clearTimeout(timeout);
+      events.off(EventName.OpenApp, onOpenApp);
     };
   }, []);
 

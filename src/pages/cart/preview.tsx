@@ -110,16 +110,14 @@ export const CartPreview: FC = () => {
 
   const processPayment = async () => {
     try {
-      await pay(totalPrice, cart);
+      const result = await pay(totalPrice, cart);
+      console.log("Payment flow finished. Result:", result);
 
-      // Payment Successful
-      setCart([]); // Clear cart
-      openSnackbar({
-        type: "success",
-        text: "Đặt hàng thành công! Cảm ơn bạn đã ủng hộ.",
-        duration: 3000,
+      // Payment returned successful result (orderId).
+      // Navigate to Result page instantly to verify transaction.
+      navigate("/result", {
+        state: result,
       });
-      navigate("/"); // Go back to Home
     } catch (error) {
       console.error("Payment failed", error);
       openSnackbar({
