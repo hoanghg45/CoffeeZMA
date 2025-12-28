@@ -21,12 +21,12 @@ export const getBranches = async (): Promise<Store[]> => {
         address, 
         phone,
         lat, 
-        long
+        COALESCE(lng, long) as long
       FROM branches 
       WHERE is_active = true OR is_active IS NULL
       ORDER BY name`
     );
-    
+
     return rows.map((row, index) => {
       // Handle both numeric and string IDs
       let numericId: number;
@@ -37,7 +37,7 @@ export const getBranches = async (): Promise<Store[]> => {
       } else {
         numericId = parseInt(row.id) || index + 1;
       }
-      
+
       return {
         id: numericId,
         name: row.name,
@@ -63,17 +63,17 @@ export const getBranchById = async (branchId: string): Promise<Branch | null> =>
         phone,
         manager_name,
         lat, 
-        long,
+        COALESCE(lng, long) as long,
         is_active
       FROM branches 
       WHERE id = $1`,
       [branchId]
     );
-    
+
     if (rows.length === 0) {
       return null;
     }
-    
+
     const row = rows[0];
     return {
       id: row.id,

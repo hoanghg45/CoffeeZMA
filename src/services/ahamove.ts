@@ -1,4 +1,5 @@
 import { getConfig } from "../utils/config";
+import { getStoreConfig } from "./store-config";
 
 // Types for AhaMove API v3
 interface AhaMovePoint {
@@ -37,7 +38,8 @@ const AHAMOVE_API_URL = "https://partner-apistg.ahamove.com/v3";
 
 export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFeeResponse> => {
   try {
-    const token = import.meta.env.VITE_AHAMOVE_TOKEN;
+    const dbToken = await getStoreConfig("AHAMOVE_V3_TOKEN");
+    const token = dbToken || import.meta.env.VITE_AHAMOVE_TOKEN;
 
     if (!token) {
       console.warn("AhaMove token is missing!");

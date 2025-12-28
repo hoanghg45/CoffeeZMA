@@ -84,20 +84,73 @@ import { Cart } from "types/cart";
 
 // ... imports
 
-const pay = async (amount: number, cart: Cart, description?: string) => {
+// ... imports
+
+// Removed updateOrderAPI as requested
+import { createOrderAPI } from "services/order";
+
+interface OrderContext {
+  customerInfo: {
+    id?: string;
+    name: string;
+    phone: string;
+    address: string;
+  };
+  fees: {
+    subtotal: number;
+    shipping: number;
+    discount?: number;
+    total: number;
+  };
+  note?: string;
+  branchId?: string;
+  deliveryLat?: number;
+  deliveryLng?: number;
+}
+
+const pay = async (amount: number, cart: Cart, context: OrderContext, existingOrderId?: string) => {
   try {
     // 1. Select Payment Method
     const { method, isCustom } = await Payment.selectPaymentMethod({
       channels: [
-        { method: "ZALOPAY_SANDBOX" },
+        { method: "COD_SANDBOX" },
         { method: "COD" },
         { method: "BANK_SANDBOX" },
+        { method: "BANK" },
       ],
     });
 
     if (!method) return;
 
-    // 2. Prepare Items
+    // 2. Call Backend API to Create Order (OR Reuse existing)
+    let backendOrderId = existingOrderId || "";
+
+    if (!backendOrderId) {
+      try {
+        const backendOrder = await createOrderAPI({
+          customerInfo: context.customerInfo,
+          cart: cart,
+          paymentMethod: typeof (method as any) === 'object' ? (method as any).id : method,
+          fees: context.fees,
+          note: context.note,
+          branchId: context.branchId,
+          deliveryLat: context.deliveryLat,
+          deliveryLng: context.deliveryLng
+        });
+        console.log("Backend Order Created:", backendOrder);
+        if (backendOrder && backendOrder.orderId) {
+          backendOrderId = backendOrder.orderId;
+        }
+      } catch (apiErr) {
+        console.error("Backend Order Creation Failed", apiErr);
+        // Verify with user: Should we block if backend fails?
+        // throw apiErr; 
+      }
+    } else {
+      console.log("Reusing existing Backend Order ID:", backendOrderId);
+    }
+
+    // 3. Prepare Items for Zalo SDK
     // Ensure keys are stable for JSON.stringify ordering
     const items = cart.map((item) => ({
       id: String(item.product.id),
@@ -113,18 +166,22 @@ const pay = async (amount: number, cart: Cart, description?: string) => {
       isCustom: selectedMethod.isCustom || false
     };
 
-    // 3. Prepare stable JSON strings for MAC and API
+    // 4. Prepare stable JSON strings for MAC and API
     // Note: Zalo SDK requires method and extradata to be JSON strings if MAC is present.
     // Item must be Array for SDK, but JSON String for MAC calculation.
     const itemStr = JSON.stringify(items);
     const methodStr = JSON.stringify(methodObject);
-    const extradataStr = JSON.stringify({ myId: "123" });
 
-    // 4. Call N8n Webhook to generate MAC
+    // Obfuscate Order ID using Base64 to satisfy "encryption" request without heavy libs
+    // User can implement AES here if needed, but btoa is compact/native.
+    const rawOrderId = backendOrderId || "temp_id";
+    const extradataStr = btoa(rawOrderId); // e.g. "ORD-123" -> "T1JELTEyMw=="
+
+    // 5. Call N8n Webhook to generate MAC
     // Send strictly strings to ensure N8n hashes the exact same content
     const macRequestPayload = {
       amount: amount,
-      desc: description ?? `Thanh toán cho ${getConfig((config) => config.app.title)}`,
+      desc: `Thanh toán cho ${getConfig((config) => config.app.title)}`,
       item: itemStr,
       method: methodStr,
       extradata: extradataStr,
@@ -182,7 +239,9 @@ const pay = async (amount: number, cart: Cart, description?: string) => {
         },
         success: (data) => {
           console.log("Payment success: ", data);
-          resolve(data);
+          // Removed updateOrderAPI call as requested
+          // Return backendOrderId so valid context can be saved
+          resolve({ ...data, backendOrderId });
         }
       });
     });

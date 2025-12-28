@@ -37,8 +37,11 @@ export const CartPreview: FC = () => {
   const [loyaltyDismissed] = useRecoilState(loyaltyPromptState);
 
   const [loyaltySheetVisible, setLoyaltySheetVisible] = useState(false);
+  // Track created Order ID to prevent duplicates if user changes payment method
+  const [createdOrderId, setCreatedOrderId] = useState<string | undefined>(undefined);
   const { openSnackbar } = useSnackbar();
   const navigate = useNavigate();
+
 
   const isLoading =
     totalPriceLoadable.state === "loading" ||
@@ -110,8 +113,29 @@ export const CartPreview: FC = () => {
 
   const processPayment = async () => {
     try {
-      const result = await pay(totalPrice, cart);
+      const result = await pay(totalPrice, cart, {
+        customerInfo: {
+          id: customerProfile?.id ?? "",
+          name: customerProfile?.name ?? "Khách lẻ",
+          phone: typeof phone === 'string' ? phone : "",
+          address: typeof selectedAddress === 'string' ? selectedAddress : (selectedAddress?.address ?? "")
+        },
+        fees: {
+          subtotal: breakdown.subtotal,
+          shipping: deliveryFee,
+          discount: breakdown.discount,
+          total: totalPrice
+        },
+        branchId: selectedStore ? String(selectedStore.id) : undefined,
+        note: "", // We will add Note input later if needed
+        deliveryLat: typeof selectedAddress === 'object' ? selectedAddress?.lat : undefined,
+        deliveryLng: typeof selectedAddress === 'object' ? selectedAddress?.long : undefined
+      }, createdOrderId);
       console.log("Payment flow finished. Result:", result);
+
+      if ((result as any).backendOrderId) {
+        setCreatedOrderId((result as any).backendOrderId);
+      }
 
       // Note: Do NOT clear cart or navigate here.
       // Payment flow is async. Success is handled via OpenApp event -> /result page.
