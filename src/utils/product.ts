@@ -3,6 +3,7 @@ import { Payment } from "zmp-sdk/apis";
 import { Option, Product } from "types/product";
 import { getConfig } from "./config";
 import { SelectedOptions } from "types/cart";
+import { getStoreConfig } from "services/store-config";
 
 export function calcFinalPrice(product: Product, options?: SelectedOptions) {
   let finalPrice = product.price;
@@ -189,9 +190,10 @@ const pay = async (amount: number, cart: Cart, context: OrderContext, existingOr
 
     console.log("Requesting MAC with payload:", macRequestPayload);
 
-    const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_MAC;
+    // Get N8N webhook URL from Config Store (DB) or Environment
+    const webhookUrl = await getStoreConfig("VITE_WEBHOOK_MAC") || import.meta.env.VITE_N8N_WEBHOOK_MAC;
     if (!webhookUrl) {
-      throw new Error("VITE_N8N_WEBHOOK_MAC is not defined in .env");
+      throw new Error("VITE_WEBHOOK_MAC is not defined in 'store_config' DB or .env");
     }
 
     const response = await fetch(webhookUrl, {

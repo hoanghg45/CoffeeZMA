@@ -1,5 +1,6 @@
 import { getPhoneNumber, getUserID, getUserInfo } from "zmp-sdk/apis";
 import { getAccessToken } from "zmp-sdk/apis";
+import { getStoreConfig } from "./store-config";
 
 /**
  * Get user's phone number from Zalo Mini App
@@ -41,13 +42,13 @@ const convertPhoneToken = async (token: string): Promise<string | null> => {
       return null;
     }
 
-    // Get N8N webhook URL from environment
-    const n8nWebhook = import.meta.env.VITE_N8N_WEBHOOK_PHONE;
+    // Get N8N webhook URL from Config Store (DB) or Environment
+    const n8nWebhook = await getStoreConfig("VITE_WEBHOOK_PHONE") || import.meta.env.VITE_N8N_WEBHOOK_PHONE;
 
     if (!n8nWebhook) {
       console.error(
         "❌ No N8N webhook configured. " +
-        "Please set VITE_N8N_WEBHOOK_PHONE in your .env file."
+        "Please set VITE_WEBHOOK_PHONE in 'store_config' DB or VITE_N8N_WEBHOOK_PHONE in .env."
       );
       return null;
     }
@@ -148,8 +149,8 @@ export const getCurrentUserID = async (): Promise<string | null> => {
  */
 export const getCurrentUserInfo = async (options?: { autoRequestPermission?: boolean }) => {
   try {
-    const { userInfo } = await getUserInfo({ 
-      autoRequestPermission: options?.autoRequestPermission ?? true 
+    const { userInfo } = await getUserInfo({
+      autoRequestPermission: options?.autoRequestPermission ?? true
     });
     return userInfo;
   } catch (error) {

@@ -1,6 +1,7 @@
 import { Cart } from "types/cart";
 import { getConfig } from "utils/config";
 import { getAccessToken } from "zmp-sdk";
+import { getStoreConfig } from "./store-config";
 
 interface OrderData {
     customerInfo: {
@@ -26,12 +27,17 @@ interface OrderData {
 }
 
 export const createOrderAPI = async (data: OrderData) => {
-    const url = import.meta.env.VITE_WEBSERVICE_URL;
-    // API Key is no longer needed
+    // Determine API URL: Try DB Config first, fallback to Env
+    let url = await getStoreConfig("VITE_WEBSERVICE_URL");
+
+    if (!url) {
+        // Fallback or just try env (optional, loop said "instead of env" but safe to check both or just warn)
+        url = import.meta.env.VITE_WEBSERVICE_URL;
+    }
     // const apiKey = import.meta.env.VITE_API_SECRET; 
 
     if (!url) {
-        console.warn("VITE_WEBSERVICE_URL is not set. Skipping API call.");
+        console.warn("VITE_WEBSERVICE_URL is not set in DB (store_config) or .env. Skipping API call.");
         return;
     }
 
