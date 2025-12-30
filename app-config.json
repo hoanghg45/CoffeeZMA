@@ -9,6 +9,11 @@
         "hideIOSSafeAreaBottom": false,
         "actionBarHidden": true
     },
+    "network": {
+        "baseDomains": [
+            "https://muoicoffeentea.com"
+        ]
+    },
     "permissions": {
         "scope.userLocation": {
             "reason": "Ứng dụng cần quyền truy cập vị trí để tìm các cửa hàng lân cận và tính phí giao hàng chính xác."

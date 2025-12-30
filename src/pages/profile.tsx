@@ -1,5 +1,5 @@
 import React, { FC, useState, Suspense } from "react";
-import { Box, Header, Page, Text, Sheet } from "zmp-ui";
+import { Box, Header, Page, Text, Sheet, useNavigate } from "zmp-ui";
 import { User, ChevronRight, MapPin, Clock, Star, Phone } from "lucide-react";
 import subscriptionDecor from "static/subscription-decor.svg";
 import { ListRenderer } from "components/list-renderer";
@@ -37,14 +37,13 @@ const Subscription: FC = () => {
 };
 
 const Personal: FC = () => {
-  const onClick = useToBeImplemented();
+  const navigate = useNavigate();
   const [addressSheetVisible, setAddressSheetVisible] = useState(false);
 
   return (
     <Box className="m-4">
       <ListRenderer
         title="Cá nhân"
-        onClick={onClick}
         items={[
           {
             left: <User size={24} />,
@@ -71,7 +70,7 @@ const Personal: FC = () => {
           {
             left: <Clock size={24} />,
             right: (
-              <Box flex>
+              <Box flex onClick={() => navigate("/order-history")}>
                 <Text.Header className="flex-1 items-center font-normal">
                   Lịch sử đơn hàng
                 </Text.Header>
@@ -102,45 +101,6 @@ const Personal: FC = () => {
   );
 };
 
-const Other: FC = () => {
-  const onClick = useToBeImplemented();
-
-  return (
-    <Box className="m-4">
-      <ListRenderer
-        title="Khác"
-        onClick={onClick}
-        items={[
-          {
-            left: <Star size={24} />,
-            right: (
-              <Box flex>
-                <Text.Header className="flex-1 items-center font-normal">
-                  Đánh giá đơn hàng
-                </Text.Header>
-                <ChevronRight size={24} />
-              </Box>
-            ),
-          },
-          {
-            left: <Phone size={24} />,
-            right: (
-              <Box flex>
-                <Text.Header className="flex-1 items-center font-normal">
-                  Liên hệ và góp ý
-                </Text.Header>
-                <ChevronRight size={24} />
-              </Box>
-            ),
-          },
-        ]}
-        renderLeft={(item) => item.left}
-        renderRight={(item) => item.right}
-      />
-    </Box>
-  );
-};
-
 const ProfilePage: FC = () => {
   return (
     <Page>
@@ -149,7 +109,6 @@ const ProfilePage: FC = () => {
         <Subscription />
       </Suspense>
       <Personal />
-      <Other />
     </Page>
   );
 };

@@ -7,7 +7,9 @@
     "dev": "vercel dev",
     "deploy": "vercel --prod"
   },
-  "dependencies": {},
+  "dependencies": {
+    "pg": "^8.16.3"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0"
@@ -16,4 +18,3 @@
     "node": ">=18.x"
   }
 }
-
