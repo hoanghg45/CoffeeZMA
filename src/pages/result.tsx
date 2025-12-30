@@ -93,9 +93,38 @@ const CheckoutResultPage: FC = () => {
     };
     events.on(EventName.OpenApp, onOpenApp);
 
+    // Listen for PaymentClose event (Momo / Manual Close behavior)
+    const onPaymentClose = (data: any = {}) => {
+      console.log("PaymentClose event received:", data);
+      const { resultCode } = data;
+
+      if (resultCode === 0) {
+        // Processing: Verify transaction again
+        console.log("PaymentClose: Processing... Verifying transaction...");
+        // If we have zmpOrderId, we can check.
+        // But checkTransaction expects 'data' object or string.
+        // Docs say: Payment.checkTransaction({ data: { zmpOrderId: ... } })
+        if (data.zmpOrderId) {
+          Payment.checkTransaction({
+            data: { zmpOrderId: data.zmpOrderId },
+            success: (rs) => setPaymentResult(rs),
+            fail: (err) => setPaymentResult(err)
+          });
+        } else {
+          // Fallback to generic check
+          check();
+        }
+      } else {
+        // Final Result (Success/Fail) directly from event
+        setPaymentResult(data);
+      }
+    };
+    events.on(EventName.PaymentClose, onPaymentClose);
+
     return () => {
       clearTimeout(timeout);
       events.off(EventName.OpenApp, onOpenApp);
+      events.off(EventName.PaymentClose, onPaymentClose);
     };
   }, []);
 

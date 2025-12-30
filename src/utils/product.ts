@@ -118,6 +118,8 @@ const pay = async (amount: number, cart: Cart, context: OrderContext, existingOr
         { method: "COD" },
         { method: "BANK_SANDBOX" },
         { method: "BANK" },
+        { method: "MOMO_SANDBOX" },
+        { method: "MOMO" }
       ],
     });
 
