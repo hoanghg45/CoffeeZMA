@@ -42,17 +42,14 @@ export const useHandlePayment = () => {
         navigate(data?.path, {
           state: data,
         });
-      } else if (data?.appTransID || data?.orderId) {
-        // Fallback for COD/Bank where path might be missing but we have ID
-        navigate("/result", {
-          state: data,
-        });
       }
     });
 
     events.on(EventName.OnDataCallback, (resp) => {
+      console.log("OnDataCallback event received:", resp);
+      if (!resp) return; // FIX: Prevent crash if resp is null
       const { appTransID, eventType } = resp;
-      if (appTransID || eventType === "PAY_BY_CUSTOM_METHOD") {
+      if (appTransID || eventType === "PAY_BY_BANK") {
         navigate("/result", {
           state: resp,
         });
@@ -61,6 +58,7 @@ export const useHandlePayment = () => {
 
     events.on(EventName.PaymentClose, (data = {}) => {
       const { zmpOrderId } = data;
+      console.log("PaymentClose event received:", data);
       navigate("/result", {
         state: { data: { zmpOrderId } },
       });

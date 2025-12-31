@@ -1,5 +1,6 @@
 import { getLocation } from "zmp-sdk/apis";
 import { getAccessToken } from "zmp-sdk/apis";
+import { getStoreConfig } from "./store-config";
 
 /**
  * Location coordinates interface
@@ -70,13 +71,13 @@ const convertLocationToken = async (token: string): Promise<LocationCoordinates 
       return null;
     }
 
-    // Get N8N webhook URL from environment
-    const n8nWebhook = import.meta.env.VITE_N8N_WEBHOOK_LOCATION;
+    // Get N8N webhook URL from Config Store (DB) or Environment
+    const n8nWebhook = await getStoreConfig("VITE_WEBHOOK_LOCATION") || import.meta.env.VITE_N8N_WEBHOOK_LOCATION;
 
     if (!n8nWebhook) {
       console.error(
         "❌ No N8N webhook configured. " +
-        "Please set VITE_N8N_WEBHOOK_LOCATION in your .env file."
+        "Please set VITE_WEBHOOK_LOCATION in 'store_config' DB or VITE_N8N_WEBHOOK_LOCATION in .env."
       );
       return null;
     }

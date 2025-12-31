@@ -1,5 +1,36 @@
 import { runQuery } from "./db";
 import { Order, OrderItem, OrderStatus } from "../types/order";
+import { Cart } from "types/cart";
+import { getConfig } from "utils/config";
+import { getAccessToken } from "zmp-sdk";
+import { getStoreConfig } from "./store-config";
+
+// --- Types for createOrderAPI ---
+
+interface OrderData {
+    customerInfo: {
+        id?: string;
+        name: string;
+        phone: string;
+        address: string;
+    };
+    cart: Cart;
+    paymentMethod: string;
+    // Added delivery coordinates
+    deliveryLat?: number;
+    deliveryLng?: number;
+
+    fees: {
+        subtotal: number;
+        shipping: number;
+        discount?: number;
+        total: number;
+    };
+    note?: string;
+    branchId?: string;
+}
+
+// --- Order Fetching Functions (History) ---
 
 export async function getOrders(userId?: string): Promise<Order[]> {
     if (!userId) return [];
@@ -15,14 +46,6 @@ export async function getOrders(userId?: string): Promise<Order[]> {
       ORDER BY created_at DESC
     `;
         const rows = await runQuery(sql, [userId]);
-
-        // For the list view, we might need some items preview
-        // Fetching items for ALL orders might be heavy. 
-        // Optimization: Fetch first 2 items for each order or just show "X items"
-        // For now, let's just return the orders and maybe fetch items if needed, 
-        // OR just fetch items for all these orders in one go if list is small.
-        // Let's keep it simple: List of orders with total/status is often enough for history list, 
-        // but the UI shows "Quantity x Name".
 
         if (rows.length === 0) return [];
 
@@ -72,7 +95,6 @@ export async function getOrderDetail(orderId: string): Promise<Order | null> {
     `;
 
         // 3. Fetch Options
-        // Join with order_items to filter by order_id
         const optionsSql = `
       SELECT oio.* 
       FROM order_item_options oio
@@ -107,27 +129,106 @@ export async function getOrderDetail(orderId: string): Promise<Order | null> {
     }
 }
 
+// --- Order Creation Function (Checkout) ---
+
+export const createOrderAPI = async (data: OrderData) => {
+    // Determine API URL: Try DB Config first, fallback to Env
+    let url = await getStoreConfig("VITE_WEBSERVICE_URL");
+
+    if (!url) {
+        // Fallback or just try env
+        url = import.meta.env.VITE_WEBSERVICE_URL;
+    }
+
+    if (!url) {
+        console.warn("VITE_WEBSERVICE_URL is not set in DB (store_config) or .env. Skipping API call.");
+        return;
+    }
+
+    // Get User Access Token
+    let token = "";
+    try {
+        const accessToken = await getAccessToken({});
+        token = accessToken;
+    } catch (err) {
+        console.error("Failed to get Access Token:", err);
+    }
+
+    // Construct items from cart
+    const items = data.cart.map((item) => ({
+        productId: item.product.id,
+        productName: item.product.name,
+        basePrice: item.product.price,
+        quantity: item.quantity,
+        unitPrice: item.product.price,
+        totalPrice: item.product.price * item.quantity,
+        options: item.options,
+    }));
+
+    const payload = {
+        customerId: data.customerInfo.id || "guest",
+        customerName: data.customerInfo.name,
+        customerPhone: data.customerInfo.phone,
+        customerAddress: data.customerInfo.address,
+        deliveryLat: data.deliveryLat,
+        deliveryLng: data.deliveryLng,
+        items: items,
+        note: data.note || "",
+        branchId: data.branchId || "branch-1",
+        paymentMethod: data.paymentMethod,
+        subtotal: data.fees.subtotal,
+        shipFee: data.fees.shipping,
+        discount: data.fees.discount || 0,
+        total: data.fees.total,
+    };
+
+    console.log("Calling Backend API:", `${url}/api/orders`, payload);
+
+    try {
+        const response = await fetch(`${url}/api/orders`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            throw new Error(`API call failed: ${response.statusText}`);
+        }
+
+        const resData = await response.json();
+        console.log("Backend API Response:", resData);
+        return resData;
+    } catch (error) {
+        console.error("Backend API Error:", error);
+        throw error;
+    }
+};
+
+// --- Helpers ---
+
 function mapRowToOrder(row: any, items: OrderItem[]): Order {
     return {
         id: row.id,
-        createdAt: row.created_at, // Postgres returns ISO/Date object usually
+        createdAt: row.created_at,
         status: row.status as OrderStatus,
-        total: Number(row.total), // Ensure number
+        total: Number(row.total),
         paymentMethod: row.payment_method,
         deliveryAddress: row.deliveryAddress || "",
         items: items,
-        // Provide defaults for tracking if not in DB yet
-        trackingCode: undefined, // row.tracking_code?
-        driverName: undefined,   // row.driver_name?
-        driverPhone: undefined   // row.driver_phone?
+        trackingCode: undefined,
+        driverName: undefined,
+        driverPhone: undefined
     };
 }
 
 function mapRowToOrderItem(row: any, options: string[] = []): OrderItem {
     return {
-        id: row.product_id, // Map product_id to OrderItem.id as per interface (Item ID usually means Product ID in UI)
+        id: row.product_id,
         name: row.product_name,
-        image: row.image || "", // Handle missing image
+        image: row.image || "",
         price: Number(row.unit_price),
         quantity: Number(row.quantity),
         options: options
