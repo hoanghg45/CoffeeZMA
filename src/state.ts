@@ -237,7 +237,7 @@ export const storesState = selector<Store[]>({
     if (branches.length === 0) {
       return [
         {
-          id: 1,
+          id: "1",
           name: "VNG Campus Store",
           address:
             "Khu chế xuất Tân Thuận, Z06, Số 13, Tân Thuận Đông, Quận 7, Thành phố Hồ Chí Minh, Việt Nam",
@@ -246,7 +246,7 @@ export const storesState = selector<Store[]>({
           phone: "02873001234",
         },
         {
-          id: 2,
+          id: "2",
           name: "The Independence Palace",
           address:
             "135 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1, Thành phố Hồ Chí Minh, Việt Nam",
@@ -255,7 +255,7 @@ export const storesState = selector<Store[]>({
           phone: "02838223629",
         },
         {
-          id: 3,
+          id: "3",
           name: "Saigon Notre-Dame Cathedral Basilica",
           address:
             "1 Công xã Paris, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh, Việt Nam",
@@ -264,7 +264,7 @@ export const storesState = selector<Store[]>({
           phone: "02838223629",
         },
         {
-          id: 4,
+          id: "4",
           name: "Bình Quới Tourist Village",
           address:
             "1147 Bình Quới, phường 28, Bình Thạnh, Thành phố Hồ Chí Minh, Việt Nam",
@@ -273,7 +273,7 @@ export const storesState = selector<Store[]>({
           phone: "02873001234",
         },
         {
-          id: 5,
+          id: "5",
           name: "Củ Chi Tunnels",
           address: "Phú Hiệp, Củ Chi, Thành phố Hồ Chí Minh, Việt Nam",
           lat: 11.051655,
@@ -318,7 +318,7 @@ export const nearbyStoresState = selector({
   },
 });
 
-export const selectedStoreIdState = atom<number | null>({
+export const selectedStoreIdState = atom<string | null>({
   key: "selectedStoreId",
   default: null,
 });

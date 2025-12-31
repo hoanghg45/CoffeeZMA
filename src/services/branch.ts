@@ -27,19 +27,9 @@ export const getBranches = async (): Promise<Store[]> => {
       ORDER BY name`
     );
 
-    return rows.map((row, index) => {
-      // Handle both numeric and string IDs
-      let numericId: number;
-      if (typeof row.id === 'string' && row.id.startsWith('branch-')) {
-        // Extract number from "branch-1" format
-        const match = row.id.match(/\d+/);
-        numericId = match ? parseInt(match[0]) : index + 1;
-      } else {
-        numericId = parseInt(row.id) || index + 1;
-      }
-
+    return rows.map((row) => {
       return {
-        id: numericId,
+        id: row.id, // ID is already a string (e.g. "branch-1")
         name: row.name,
         address: row.address,
         phone: row.phone,
