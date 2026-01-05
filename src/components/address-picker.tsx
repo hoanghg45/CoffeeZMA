@@ -180,15 +180,14 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
             <Button
               size="small"
               variant="primary"
-              icon={<Plus size={20} />}
               onClick={() => {
                 setIsEditing(true);
                 setEditingAddress(null);
                 setForm({ name: "", address: "", phone: "" });
               }}
-              className="rounded-lg"
+              className="rounded-lg flex items-center justify-center p-0 w-9 h-9"
             >
-              Thêm mới
+              <Plus size={20} className="flex-shrink-0" />
             </Button>
           </Box>
 
