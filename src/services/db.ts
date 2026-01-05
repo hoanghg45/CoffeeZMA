@@ -67,6 +67,9 @@ export async function runQuery<T = any>(sql: string, params: any[] = []): Promis
 /**
  * compatibility layer for existing codebases expecting a 'pg' like interface.
  * Matches the interface of @neondatabase/serverless or pg Pool.
+ * 
+ * NOTE: The proxy API is stateless and doesn't support true transactions.
+ * BEGIN/COMMIT/ROLLBACK are no-ops, but queries will still execute.
  */
 export const pool = {
   /**
@@ -80,6 +83,40 @@ export const pool = {
       command: text.split(' ')[0].toUpperCase(),
       oid: 0,
       fields: []
+    };
+  },
+  /**
+   * Mock of pg.Pool.connect() - returns a client-like object
+   * Since the proxy API is stateless, transactions (BEGIN/COMMIT/ROLLBACK) are no-ops
+   */
+  connect: async () => {
+    return {
+      /**
+       * Client query method - wraps pool.query
+       * Transaction commands (BEGIN/COMMIT/ROLLBACK) are silently ignored
+       * since the proxy API doesn't support transactions
+       */
+      query: async <T = any>(text: string, values?: any[]) => {
+        const upperText = text.trim().toUpperCase();
+        // Ignore transaction commands (no-op for stateless proxy)
+        if (upperText === 'BEGIN' || upperText === 'COMMIT' || upperText === 'ROLLBACK') {
+          return {
+            rows: [],
+            rowCount: 0,
+            command: upperText,
+            oid: 0,
+            fields: []
+          };
+        }
+        // Execute actual queries
+        return pool.query<T>(text, values);
+      },
+      /**
+       * Release method - no-op for stateless proxy
+       */
+      release: () => {
+        // No-op: stateless proxy doesn't maintain connections
+      }
     };
   }
 };
