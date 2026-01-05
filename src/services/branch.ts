@@ -21,7 +21,7 @@ export const getBranches = async (): Promise<Store[]> => {
         address, 
         phone,
         lat, 
-        COALESCE(lng, long) as long
+        long
       FROM branches 
       WHERE is_active = true OR is_active IS NULL
       ORDER BY name`
@@ -53,7 +53,7 @@ export const getBranchById = async (branchId: string): Promise<Branch | null> =>
         phone,
         manager_name,
         lat, 
-        COALESCE(lng, long) as long,
+        long,
         is_active
       FROM branches 
       WHERE id = $1`,
