@@ -12,6 +12,8 @@ import { calcFinalPrice } from "utils/product";
 import { calculatePriceBreakdown } from "utils/pricing";
 import { wait } from "utils/async";
 import { getCategories } from "services/category";
+import { getBanners } from "services/banner";
+import { Banner } from "types/banner";
 import { getProducts } from "services/product";
 import { getVariants } from "services/variant";
 import { estimateFee } from "services/ahamove";
@@ -94,6 +96,13 @@ export const categoriesState = selector({
   key: "categories",
   get: async () => {
     return await getCategories();
+  },
+});
+
+export const bannersState = selector<Banner[]>({
+  key: "banners",
+  get: async () => {
+    return await getBanners();
   },
 });
 
