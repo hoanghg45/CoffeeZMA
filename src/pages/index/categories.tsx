@@ -49,13 +49,13 @@ export const Categories: FC = () => {
                   onClick={() => gotoCategory(category.id)}
                   className="flex flex-col space-y-2 items-center"
                 >
-                  {category.icon.startsWith("http") || category.icon.startsWith("/") ? (
-                    <img className="w-12 h-12 object-contain" src={category.icon} />
-                  ) : (
-                    <div className="w-12 h-12 flex items-center justify-center text-3xl">
-                      {category.icon}
-                    </div>
-                  )}
+                  <div className="w-12 h-12 rounded-md overflow-hidden bg-[#F5F5F5] flex items-center justify-center shadow-sm">
+                    {category.image ? (
+                      <img className="w-full h-full object-cover" src={category.image} />
+                    ) : (
+                      <span className="text-2xl">{category.icon}</span>
+                    )}
+                  </div>
                   <Text size="xxSmall" className="text-gray text-center line-clamp-2 h-8">
                     {category.name}
                   </Text>
