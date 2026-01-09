@@ -114,8 +114,6 @@ const pay = async (amount: number, cart: Cart, context: OrderContext, existingOr
     // 1. Select Payment Method
     const { method, isCustom } = await Payment.selectPaymentMethod({
       channels: [
-        { method: "COD_SANDBOX" },
-        { method: "COD" },
         { method: "BANK_SANDBOX" },
         { method: "BANK" },
         { method: "MOMO_SANDBOX" },
