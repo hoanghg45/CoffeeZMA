@@ -1,7 +1,7 @@
 import { atom, selector, selectorFamily } from "recoil";
 import { getCurrentPhoneNumber, getCurrentUserInfo } from "services/user-info";
 import { getCurrentLocation } from "services/location";
-import logo from "static/logo.png";
+import logo from "static/muoi-squarelogo.png";
 import { Product } from "types/product";
 import { Cart } from "types/cart";
 import { Notification } from "types/notification";

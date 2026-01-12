@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { Box, Header, Text } from "zmp-ui";
-import logo from "static/logo.png";
+import logo from "static/muoi-squarelogo.png";
 import appConfig from "../../../app-config.json";
 import { getConfig } from "utils/config";
 
@@ -13,7 +13,7 @@ export const Welcome: FC = () => {
         (
           <Box flex alignItems="center" className="space-x-2">
             <img
-              className="w-8 h-8 rounded-lg border-inset"
+              className="w-8 h-8 rounded-md border-inset"
               src={getConfig((c) => c.template.headerLogo) || logo}
             />
             <Box>
