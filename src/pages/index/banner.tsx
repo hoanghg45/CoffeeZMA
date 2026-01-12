@@ -46,7 +46,7 @@ export const Banner: FC = () => {
         ))}
       </Swiper>
       <Box
-        className="absolute top-4 right-4 z-10 bg-white p-2 rounded-full shadow-lg"
+        className="absolute top-4 right-4 z-10 bg-white w-10 h-10 flex items-center justify-center rounded-full shadow-lg"
         onClick={() => navigate("/search")}
       >
         <Icon icon="zi-search" size={24} />
