@@ -32,7 +32,7 @@ export const Categories: FC = () => {
   };
 
   return (
-    <Box className="bg-white p-4 pb-0">
+    <Box className="bg-white px-4 pt-6 pb-0 rounded-t-2xl relative -mt-3 z-10">
       <Swiper
         modules={[Pagination]}
         pagination={{

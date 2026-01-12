@@ -1,7 +1,7 @@
 import React, { FC } from "react";
 import { Pagination, Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Box } from "zmp-ui";
+import { Box, Icon } from "zmp-ui";
 import { useRecoilValue } from "recoil";
 import { bannersState } from "state";
 import { useNavigate } from "react-router";
@@ -21,7 +21,7 @@ export const Banner: FC = () => {
   };
 
   return (
-    <Box className="bg-white" pb={4}>
+    <Box className="bg-white relative" pb={0}>
       <Swiper
         modules={[Pagination, Autoplay]}
         pagination={{
@@ -36,15 +36,21 @@ export const Banner: FC = () => {
         touchEventsTarget="container"
       >
         {banners.map((banner, i) => (
-          <SwiperSlide key={banner.id || i} className="px-4">
+          <SwiperSlide key={banner.id || i} className="px-0">
             <Box
-              className="w-full rounded-lg aspect-[2/1] bg-cover bg-center bg-skeleton"
+              className="w-full aspect-[2/1] bg-cover bg-center bg-skeleton"
               style={{ backgroundImage: `url(${banner.imageUrl})` }}
               onClick={() => handleBannerClick(banner.link)}
             />
           </SwiperSlide>
         ))}
       </Swiper>
+      <Box
+        className="absolute top-4 right-4 z-10 bg-white p-2 rounded-full shadow-lg"
+        onClick={() => navigate("/search")}
+      >
+        <Icon icon="zi-search" size={24} />
+      </Box>
     </Box>
   );
 };
