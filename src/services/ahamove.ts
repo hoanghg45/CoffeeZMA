@@ -44,7 +44,7 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
     if (!token) {
       console.warn("AhaMove token is missing!");
       return {
-        total_pay: 30000,
+        total_pay: 0,
         distance: 0,
         duration: 0,
         currency: "VND"
@@ -96,7 +96,7 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
       const item = data[0]; // Assuming first service/item
       if (item.data) {
         return {
-          total_pay: item.data.total_price || item.data.total_pay || 30000,
+          total_pay: item.data.total_price || item.data.total_pay || 0,
           distance: item.data.distance || 0,
           duration: item.data.duration || 0,
           currency: item.data.currency || "VND"
@@ -106,7 +106,7 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
 
     // Fallback for object structure (if API changes again)
     return {
-      total_pay: data.total_pay || data.fee || 30000,
+      total_pay: data.total_pay || data.fee || 0,
       distance: data.distance || 0,
       duration: data.duration || 0,
       currency: data.currency || "VND"
@@ -115,7 +115,7 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
   } catch (error) {
     console.error("Error estimating fee:", error);
     return {
-      total_pay: 30000, // Fallback default
+      total_pay: 0, // Fallback default
       distance: 0,
       duration: 0,
       currency: "VND"
