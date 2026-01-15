@@ -510,6 +510,11 @@ export const voucherPickerVisibleState = atom({
   default: false,
 });
 
+export const useCurrentLocationState = atom<boolean>({
+  key: "useCurrentLocation",
+  default: false,
+});
+
 export const userAddressesState = selector<CustomerAddress[]>({
   key: "userAddresses",
   get: async ({ get }) => {
@@ -527,6 +532,7 @@ export const calculatedDeliveryFeeState = selector({
     const cart = get(cartState);
     const user = get(userState);
     const location = get(locationState);
+    const useCurrentLocation = get(useCurrentLocationState);
 
     let destLat = 0;
     let destLng = 0;
@@ -540,10 +546,10 @@ export const calculatedDeliveryFeeState = selector({
       destAddress = address.address;
       destName = address.name || user.name;
       destPhone = address.phone;
-    } else if (location) {
+    } else if (useCurrentLocation && location) {
       destLat = parseFloat(location.latitude);
       destLng = parseFloat(location.longitude);
-      destAddress = "Current Location";
+      destAddress = "Vị trí hiện tại";
       destName = user.name;
       destPhone = ""; // Optional or use user's phone if available
     }

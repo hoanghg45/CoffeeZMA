@@ -55,7 +55,7 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
     const requestBody: any = {
       path: params.path,
       services: [{
-        "_id": "SGN-BIKE"
+        "_id": "SGN-FOOD"
       }], // Service ID array
       items: params.items,
       payment_method: params.payment_method || "CASH" // Default to cash on delivery
