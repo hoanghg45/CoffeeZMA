@@ -524,6 +524,12 @@ export const userAddressesState = selector<CustomerAddress[]>({
   },
 });
 
+// Shipping Service State
+export const shippingServiceState = atom<"SGN-BIKE" | "SGN-ECO">({
+  key: "shippingService",
+  default: "SGN-ECO", // Default to cheap eco option
+});
+
 export const calculatedDeliveryFeeState = selector({
   key: "calculatedDeliveryFee",
   get: async ({ get }) => {
@@ -533,6 +539,7 @@ export const calculatedDeliveryFeeState = selector({
     const user = get(userState);
     const location = get(locationState);
     const useCurrentLocation = get(useCurrentLocationState);
+    const serviceId = get(shippingServiceState);
 
     let destLat = 0;
     let destLng = 0;
@@ -583,7 +590,8 @@ export const calculatedDeliveryFeeState = selector({
         price: item.product.price,
         num: item.quantity
       })),
-      payment_method: "CASH" // Default to cash on delivery
+      payment_method: "CASH", // Default to cash on delivery
+      serviceId: serviceId
     });
 
     return fee.total_pay;

@@ -1,7 +1,7 @@
 import { ElasticTextarea } from "components/elastic-textarea";
 import React, { FC, Suspense, useMemo } from "react";
 import { Box, Text } from "zmp-ui";
-import { Home, Clock, User, ChevronRight, FileText, AlertCircle, MapPin } from "lucide-react";
+import { Home, Clock, User, ChevronRight, FileText, AlertCircle, MapPin, Truck } from "lucide-react";
 import { RequestPersonPickerPhone } from "./person-picker";
 import { TimePicker } from "./time-picker";
 import { useRecoilState, useRecoilValueLoadable, useSetRecoilState, useRecoilValue } from "recoil";
@@ -18,6 +18,7 @@ import { AddressPicker } from "components/address-picker";
 import { BranchPicker } from "components/branch-picker";
 import { VoucherPicker } from "components/voucher-picker";
 import { validateCheckoutFields } from "utils/checkout-validation";
+import { ShippingServicePicker } from "./shipping-picker";
 
 export const Delivery: FC = () => {
   const [note, setNote] = useRecoilState(orderNoteState);
@@ -80,6 +81,7 @@ export const Delivery: FC = () => {
           </Box>
         </Suspense>
 
+
         {/* Branch Selection (Source) */}
         <Box className="flex items-start space-x-3">
           <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mt-1">
@@ -96,6 +98,17 @@ export const Delivery: FC = () => {
                 <Text size="xSmall" className="text-red-500">Vui lòng chọn cửa hàng</Text>
               </Box>
             )}
+          </Box>
+        </Box>
+
+        {/* Shipping Service Selection */}
+        <Box className="flex items-start space-x-3 pt-2 border-t border-gray-100">
+          <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mt-1">
+            <Truck className="text-yellow-600" size={20} />
+          </Box>
+          <Box className="flex-1">
+            <Text size="xSmall" className="text-gray-500 mb-2">Hình thức giao hàng</Text>
+            <ShippingServicePicker />
           </Box>
         </Box>
 

@@ -24,6 +24,7 @@ export interface EstimateFeeParams {
   order_time?: number;
   remarks?: string;
   promo_code?: string;
+  serviceId?: "SGN-BIKE" | "SGN-ECO";
 }
 
 export interface EstimateFeeResponse {
@@ -55,7 +56,7 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
     const requestBody: any = {
       path: params.path,
       services: [{
-        "_id": "SGN-FOOD"
+        "_id": params.serviceId || "SGN-ECO"
       }], // Service ID array
       items: params.items,
       payment_method: params.payment_method || "CASH" // Default to cash on delivery
