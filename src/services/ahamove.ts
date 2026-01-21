@@ -35,11 +35,13 @@ export interface EstimateFeeResponse {
 }
 
 // AhaMove Partner API v3 endpoint
-const AHAMOVE_API_URL = "https://partner-apistg.ahamove.com/v3";
+
 
 export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFeeResponse> => {
   try {
     const dbToken = await getStoreConfig("AHAMOVE_V3_TOKEN");
+    const dbApiUrl = await getStoreConfig("AHAMOVE_API_URL");
+    const AHAMOVE_API_URL = dbApiUrl || "https://partner-apistg.ahamove.com/v3";
     const token = dbToken || import.meta.env.VITE_AHAMOVE_TOKEN;
 
     if (!token) {
