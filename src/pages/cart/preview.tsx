@@ -67,6 +67,16 @@ export const CartPreview: FC = () => {
   );
 
   const handleCheckout = async () => {
+    // Prevent checkout if delivery info has error
+    if (deliveryFeeLoadable.state === "hasError") {
+      openSnackbar({
+        type: "error",
+        text: (deliveryFeeLoadable as any).error?.message || "Vui lòng chọn phương thức giao hàng phù hợp",
+        duration: 3000,
+      });
+      return;
+    }
+
     // Validate required fields first
     if (!validation.isValid) {
       const errorMessage = getFirstValidationError(validation);
