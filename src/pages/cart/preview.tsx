@@ -185,9 +185,15 @@ export const CartPreview: FC = () => {
           {/* Delivery Fee Row */}
           <Box className="flex justify-between items-center text-sm">
             <Text className="text-gray-500">Phí giao hàng</Text>
-            <Text className="font-medium text-gray-900">
-              {deliveryFeeLoadable.state === "loading" ? "..." : <DisplayPrice>{deliveryFee}</DisplayPrice>}
-            </Text>
+            {deliveryFeeLoadable.state === "hasError" ? (
+              <Text className="font-medium text-red-500 text-xs text-right max-w-[60%]">
+                {(deliveryFeeLoadable as any).error?.message || "Khoảng cách quá xa"}
+              </Text>
+            ) : (
+              <Text className="font-medium text-gray-900">
+                {deliveryFeeLoadable.state === "loading" ? "..." : <DisplayPrice>{deliveryFee}</DisplayPrice>}
+              </Text>
+            )}
           </Box>
 
           {/* Discount Row */}
@@ -218,7 +224,7 @@ export const CartPreview: FC = () => {
             />
           </Box>
           <Text size="xLarge" className="font-bold text-primary leading-tight">
-            {isLoading ? "..." : <DisplayPrice>{totalPrice}</DisplayPrice>}
+            {isLoading ? "..." : (deliveryFeeLoadable.state === "hasError" ? "Tạm tính" : <DisplayPrice>{totalPrice}</DisplayPrice>)}
           </Text>
         </Box>
 
@@ -226,7 +232,7 @@ export const CartPreview: FC = () => {
         <Button
           type="highlight"
           variant="primary"
-          disabled={!quantity || isLoading}
+          disabled={!quantity || isLoading || deliveryFeeLoadable.state === "hasError"}
           fullWidth
           onClick={handleCheckout}
           className="rounded-full h-12 text-base font-bold shadow-md flex-1 m-0"

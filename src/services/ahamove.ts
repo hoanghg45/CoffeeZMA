@@ -95,6 +95,19 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
 
     if (Array.isArray(data) && data.length > 0) {
       const item = data[0]; // Assuming first service/item
+
+      // Handle explicit API error (e.g., INVALID_MAX_DISTANCE)
+      if (item.error) {
+        console.warn("AhaMove estimate error:", item.error);
+
+        // Simplicity: Clear constraint communication
+        if (item.error.code === 'INVALID_MAX_DISTANCE') {
+          throw new Error("Vượt quá giới hạn 100km");
+        }
+
+        throw new Error(item.error.description || item.error.title || "Lỗi giao hàng");
+      }
+
       if (item.data) {
         return {
           total_pay: item.data.total_price || item.data.total_pay || 0,
