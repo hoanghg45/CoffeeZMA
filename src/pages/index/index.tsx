@@ -7,6 +7,7 @@ import { Categories } from "./categories";
 import { Recommend } from "./recommend";
 import { ProductList } from "./product-list";
 import { Divider } from "components/divider";
+import { CartFloat } from "components/cart/cart-float";
 
 const HomePage: React.FunctionComponent = () => {
   return (
@@ -25,7 +26,9 @@ const HomePage: React.FunctionComponent = () => {
         <Divider />
         <ProductList />
         <Divider />
+        <Divider />
       </Box>
+      <CartFloat />
     </Page>
   );
 };

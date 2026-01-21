@@ -75,6 +75,19 @@ export const CartPreview: FC = () => {
         text: errorMessage || "Vui lòng điền đầy đủ thông tin trước khi đặt hàng",
         duration: 3000,
       });
+
+      // Scroll to the first missing field provided by validation
+      // Mapping validation keys to identifying DOM Ids
+      if (validation.missingFields.address) {
+        document.getElementById("checkout-address-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else if (validation.missingFields.store) {
+        document.getElementById("checkout-store-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else if (validation.missingFields.time) {
+        document.getElementById("checkout-time-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else if (validation.missingFields.phone) {
+        document.getElementById("checkout-phone-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
       return;
     }
 
@@ -198,7 +211,7 @@ export const CartPreview: FC = () => {
       <Button
         type="highlight"
         variant="primary"
-        disabled={!quantity || isLoading || !validation.isValid}
+        disabled={!quantity || isLoading}
         fullWidth
         onClick={handleCheckout}
         className="rounded-full h-12 text-base font-bold shadow-md"

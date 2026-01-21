@@ -59,7 +59,7 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
         "_id": params.serviceId || "SGN-ECO"
       }], // Service ID array
       items: params.items,
-      payment_method: params.payment_method || "CASH" // Default to cash on delivery
+      payment_method: params.payment_method || "CASH_BY_RECIPIENT" // Default to cash on delivery
     };
 
     // Add optional fields if provided

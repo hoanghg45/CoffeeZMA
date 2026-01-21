@@ -62,7 +62,7 @@ export const Delivery: FC = () => {
       <Box className="bg-surface rounded-md p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] space-y-4">
         {/* Address Selection */}
         <Suspense fallback={<Box className="p-4 flex justify-center"><Text className="text-gray-400">Đang tải địa chỉ...</Text></Box>}>
-          <Box className="flex items-center space-x-3">
+          <Box id="checkout-address-section" className="flex items-center space-x-3">
             <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
               <MapPin className="text-yellow-600" size={20} />
             </Box>
@@ -83,7 +83,7 @@ export const Delivery: FC = () => {
 
 
         {/* Branch Selection (Source) */}
-        <Box className="flex items-start space-x-3">
+        <Box id="checkout-store-section" className="flex items-start space-x-3">
           <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mt-1">
             <Home className="text-yellow-600" size={20} />
           </Box>
@@ -115,7 +115,7 @@ export const Delivery: FC = () => {
       </Box>
 
       {/* Time & Details - Common for both */}
-      <Box className="bg-surface rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+      <Box id="checkout-time-section" className="bg-surface rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
         <Box className="flex items-center space-x-3">
           <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
             <Clock className="text-yellow-600" size={20} />
@@ -138,7 +138,7 @@ export const Delivery: FC = () => {
 
       {/* Recipient & Note */}
       <Box className="bg-surface rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] space-y-4">
-        <Box className="flex items-center space-x-3">
+        <Box id="checkout-phone-section" className="flex items-center space-x-3">
           <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
             <User className="text-yellow-600" size={20} />
           </Box>
