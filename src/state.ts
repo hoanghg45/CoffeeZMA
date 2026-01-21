@@ -590,7 +590,7 @@ export const calculatedDeliveryFeeState = selector({
         price: item.product.price,
         num: item.quantity
       })),
-      payment_method: "CASH_BY_RECIPIENT", // Default to cash on delivery
+      payment_method: "CASH", // Sender (shop) pays the driver
       serviceId: serviceId
     });
 

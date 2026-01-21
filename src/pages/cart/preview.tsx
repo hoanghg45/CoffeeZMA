@@ -58,6 +58,12 @@ export const CartPreview: FC = () => {
   const selectedStore = selectedStoreLoadable.state === "hasValue" ? selectedStoreLoadable.contents : null;
   const phone = phoneLoadable.state === "hasValue" ? phoneLoadable.contents : false;
 
+  // Debug: Log delivery fee state
+  console.log("[CartPreview] deliveryFeeLoadable.state:", deliveryFeeLoadable.state);
+  if (deliveryFeeLoadable.state === "hasError") {
+    console.log("[CartPreview] deliveryFeeLoadable.error:", (deliveryFeeLoadable as any).error);
+  }
+
   // Validate checkout fields
   const validation = validateCheckoutFields(
     selectedAddress,

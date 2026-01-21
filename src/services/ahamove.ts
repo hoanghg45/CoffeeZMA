@@ -59,7 +59,7 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
         "_id": params.serviceId || "SGN-ECO"
       }], // Service ID array
       items: params.items,
-      payment_method: params.payment_method || "CASH_BY_RECIPIENT" // Default to cash on delivery
+      payment_method: params.payment_method || "CASH" // Sender (shop) pays the driver
     };
 
     // Add optional fields if provided
@@ -98,13 +98,16 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
 
       // Handle explicit API error (e.g., INVALID_MAX_DISTANCE)
       if (item.error) {
-        console.warn("AhaMove estimate error:", item.error);
+        console.warn("[AhaMove] API returned error:", item.error);
 
         // Simplicity: Clear constraint communication
         if (item.error.code === 'INVALID_MAX_DISTANCE') {
-          throw new Error("Vượt quá giới hạn 100km");
+          const errorMsg = "Vượt quá giới hạn 100km";
+          console.error("[AhaMove] Throwing distance limit error:", errorMsg);
+          throw new Error(errorMsg);
         }
 
+        console.error("[AhaMove] Throwing general error:", item.error.description);
         throw new Error(item.error.description || item.error.title || "Lỗi giao hàng");
       }
 
@@ -128,8 +131,14 @@ export const estimateFee = async (params: EstimateFeeParams): Promise<EstimateFe
 
   } catch (error) {
     console.error("Error estimating fee:", error);
+    // Re-throw business logic errors (like distance limit) to let UI handle them
+    // Only catch unexpected network/parsing errors
+    if (error instanceof Error && error.message.includes("100km")) {
+      throw error;
+    }
+    // For other errors, return fallback
     return {
-      total_pay: 0, // Fallback default
+      total_pay: 0,
       distance: 0,
       duration: 0,
       currency: "VND"
