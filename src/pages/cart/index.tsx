@@ -3,7 +3,7 @@ import { Divider } from "components/divider";
 import { Header, Page } from "zmp-ui";
 import { CartItems } from "./cart-items";
 import { CartPreview } from "./preview";
-import { TermsAndPolicies } from "./term-and-policies";
+
 import { Delivery } from "./delivery";
 import { useVirtualKeyboardVisible } from "hooks";
 import { useRecoilValue } from "recoil";
@@ -21,7 +21,7 @@ const CartPage: FC = () => {
       <div className="flex-1 overflow-y-auto pb-4">
         <CartItems />
         <Delivery />
-        <TermsAndPolicies />
+
       </div>
       {!keyboardVisible && !addressPickerVisible && !addressEditing && !voucherPickerVisible && <CartPreview />}
     </Page>
