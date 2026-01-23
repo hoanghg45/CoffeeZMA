@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useRecoilRefresher_UNSTABLE } from "recoil";
 import { Box, Button, Input, Text } from "zmp-ui";
-import { MapPin, ChevronRight, Plus, Edit, Trash2, X, Bookmark, Phone } from "lucide-react";
+import { MapPin, ChevronRight, Plus, Edit, Trash2, X, Bookmark } from "lucide-react";
 import { formatPhoneNumber } from "utils/phone";
 import { Sheet } from "./fullscreen-sheet";
 import { createPortal } from "react-dom";
@@ -39,7 +39,7 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
   }, [addresses]);
 
   const handleSave = async () => {
-    if (!form.name || !form.address || !form.phone) return;
+    if (!form.name || !form.address) return;
 
     const savedAddress = await saveCustomerAddress({
       id: editingAddress?.id,
@@ -48,7 +48,7 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
       address: form.address,
       lat: form.lat || editingAddress?.lat || 0,
       long: form.long || editingAddress?.long || 0,
-      phone: form.phone,
+      phone: form.phone || "",
       isDefault: editingAddress?.isDefault || (addresses.length === 0 && !editingAddress)
     });
 
@@ -233,7 +233,7 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
                           )}
                         </Box>
                         <Text size="xSmall" className="text-gray-600 mb-1 line-clamp-2">{addr.address}</Text>
-                        <Text size="xSmall" className="text-gray-500">{formatPhoneNumber(addr.phone)}</Text>
+
                       </Box>
                     </Box>
 
@@ -342,22 +342,7 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
                 </Box>
 
                 {/* Phone Field */}
-                <Box className="bg-white rounded-xl p-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                  <Box className="flex items-center space-x-3">
-                    <Box className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                      <Phone className="text-yellow-600" size={18} />
-                    </Box>
-                    <Box className="flex-1 min-w-0">
-                      <Text size="xSmall" className="text-gray-500 mb-0.5">Số điện thoại nhận hàng</Text>
-                      <Input
-                        value={form.phone || ""}
-                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                        placeholder="Nhập số điện thoại"
-                        className="border-none px-0 bg-transparent text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none p-0 h-auto"
-                      />
-                    </Box>
-                  </Box>
-                </Box>
+
               </Box>
             </Box>
 
@@ -377,7 +362,7 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
                   type="highlight"
                   fullWidth
                   onClick={handleSave}
-                  disabled={!form.name || !form.address || !form.phone}
+                  disabled={!form.name || !form.address}
                   className="rounded-full h-11 text-sm font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editingAddress ? "Cập nhật" : "Lưu địa chỉ"}
