@@ -7,13 +7,14 @@ import { CartPreview } from "./preview";
 import { Delivery } from "./delivery";
 import { useVirtualKeyboardVisible } from "hooks";
 import { useRecoilValue } from "recoil";
-import { addressPickerVisibleState, addressEditingState, voucherPickerVisibleState } from "state";
+import { addressPickerVisibleState, addressEditingState, voucherPickerVisibleState, selectedStoreIdState } from "state";
 
 const CartPage: FC = () => {
   const keyboardVisible = useVirtualKeyboardVisible();
   const addressPickerVisible = useRecoilValue(addressPickerVisibleState);
   const addressEditing = useRecoilValue(addressEditingState);
   const voucherPickerVisible = useRecoilValue(voucherPickerVisibleState);
+  const selectedStoreId = useRecoilValue(selectedStoreIdState);
 
   return (
     <Page className="flex flex-col bg-gray-100 min-h-screen">
