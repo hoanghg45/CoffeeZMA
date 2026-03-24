@@ -116,6 +116,8 @@ const pay = async (amount: number, cart: Cart, context: OrderContext, existingOr
       channels: [
         { method: "BANK_SANDBOX" },
         { method: "BANK" },
+        { method: "COD" },
+        { method: "COD_SANDBOX" },
         { method: "MOMO_SANDBOX" },
         { method: "MOMO" }
       ],
