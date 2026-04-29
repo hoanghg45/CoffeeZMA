@@ -7,6 +7,13 @@ import {
     checkoutSheetVisibleState,
     cartState,
     priceBreakdownState,
+    orderNoteState,
+    selectedStoreState,
+    selectedAddressState,
+    useCurrentLocationState,
+    locationState,
+    userState,
+    phoneState
 } from "state";
 import { CheckoutItem } from "./checkout-item";
 import { VoucherSection } from "./voucher-section";
@@ -20,10 +27,52 @@ import pay from "utils/product";
 const CheckoutContent: FC<{ onClose: () => void }> = ({ onClose }) => {
     const cart = useRecoilValue(cartState);
     const priceBreakdown = useRecoilValue(priceBreakdownState);
+    const orderNote = useRecoilValue(orderNoteState);
+    const store = useRecoilValue(selectedStoreState);
+    const selectedAddress = useRecoilValue(selectedAddressState);
+    const location = useRecoilValue(locationState);
+    const useCurrentLocation = useRecoilValue(useCurrentLocationState);
+    const user = useRecoilValue(userState);
+    const phone = useRecoilValue(phoneState);
+
     const [editingItem, setEditingItem] = useState<CartItem | undefined>();
 
     const handleCheckout = () => {
-        pay(priceBreakdown.finalPrice);
+        let destLat, destLng, destAddress, destName, destPhone;
+        if (selectedAddress) {
+            destLat = selectedAddress.lat;
+            destLng = selectedAddress.long;
+            destAddress = selectedAddress.address;
+            destName = selectedAddress.name || user.name;
+            destPhone = selectedAddress.phone;
+        } else if (useCurrentLocation && location) {
+            destLat = parseFloat(location.latitude);
+            destLng = parseFloat(location.longitude);
+            destAddress = "Vị trí hiện tại";
+            destName = user.name;
+            destPhone = phone ? String(phone) : "";
+        }
+
+        const context = {
+            customerInfo: {
+                id: user.id,
+                name: destName || user.name,
+                phone: destPhone || (phone ? String(phone) : ""),
+                address: destAddress || ""
+            },
+            fees: {
+                subtotal: priceBreakdown.subtotal,
+                shipping: priceBreakdown.shippingFee,
+                discount: priceBreakdown.discount,
+                total: priceBreakdown.finalPrice
+            },
+            note: orderNote,
+            branchId: store?.id,
+            deliveryLat: destLat,
+            deliveryLng: destLng
+        };
+
+        pay(priceBreakdown.finalPrice, cart, context);
         onClose();
     };
 

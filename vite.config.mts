@@ -10,6 +10,9 @@ export default () => {
     root: "./src",
     base: "",
     plugins: [zaloMiniApp(), tsconfigPaths(), react()],
+    build: {
+      target: "es2020",
+    },
     resolve: {
       alias: {
         "utils": path.resolve(process.cwd(), "src/utils"),

@@ -1,9 +1,10 @@
 import React, { FC, useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useRecoilRefresher_UNSTABLE } from "recoil";
 import { Box, Button, Input, Text } from "zmp-ui";
-import { MapPin, ChevronRight, Plus, Edit, Trash2, X, Bookmark } from "lucide-react";
+import { MapPin, ChevronRight, Plus, Edit, Trash2, X, Bookmark, Map } from "lucide-react";
 import { formatPhoneNumber } from "utils/phone";
 import { Sheet } from "./fullscreen-sheet";
+import { MapPicker } from "./map-picker";
 import { createPortal } from "react-dom";
 import { selectedAddressState, userAddressesState, userState, addressPickerVisibleState, addressEditingState } from "../state";
 import { saveCustomerAddress, deleteCustomerAddress, CustomerAddress } from "../services/customer";
@@ -22,6 +23,7 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
   const [isEditing, setIsEditing] = useRecoilState(addressEditingState);
   const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [mapPickerVisible, setMapPickerVisible] = useState(false);
   const user = useRecoilValue(userState);
 
   // Form State
@@ -125,7 +127,7 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
       let addressText = `Vị trí hiện tại: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
 
       try {
-        const { reverseGeocode } = await import("../services/mapbox");
+        const { reverseGeocode } = await import("../services/trackasia");
         const geocodedAddress = await reverseGeocode(latitude, longitude);
         if (geocodedAddress) {
           addressText = geocodedAddress;
@@ -324,11 +326,21 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
                     <Box className="flex-1 min-w-0">
                       <Box className="flex items-center justify-between mb-0.5">
                         <Text size="xSmall" className="text-gray-500">Địa chỉ</Text>
-                        <Box
-                          className="w-6 h-6 flex items-center justify-center active:opacity-50 cursor-pointer"
-                          onClick={handleGetCurrentLocation}
-                        >
-                          <MapPin size={16} className="text-gray-400" />
+                        <Box className="flex items-center gap-3">
+                          <Box
+                            className="flex items-center justify-center active:opacity-50 cursor-pointer gap-1"
+                            onClick={() => setMapPickerVisible(true)}
+                          >
+                            <Map size={16} className="text-blue-500" />
+                            <Text size="xxxxSmall" className="text-blue-500 font-medium">Bản đồ</Text>
+                          </Box>
+                          <Box
+                            className="flex items-center justify-center active:opacity-50 cursor-pointer gap-1"
+                            onClick={handleGetCurrentLocation}
+                          >
+                            <MapPin size={16} className="text-gray-400" />
+                            <Text size="xxxxSmall" className="text-gray-500">Định vị</Text>
+                          </Box>
                         </Box>
                       </Box>
                       <Input
@@ -412,6 +424,22 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
           </Box>
         </Box>
       </Sheet>
+
+      {/* Map Picker Sheet */}
+      <MapPicker
+        visible={mapPickerVisible}
+        onClose={() => setMapPickerVisible(false)}
+        onSelect={(lat, long, addressText) => {
+          setForm(prev => ({
+            ...prev,
+            lat,
+            long,
+            address: addressText
+          }));
+        }}
+        initialLat={form.lat || editingAddress?.lat || undefined}
+        initialLong={form.long || editingAddress?.long || undefined}
+      />
     </>
   );
 };

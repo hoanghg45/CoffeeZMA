@@ -197,7 +197,7 @@ export const saveCustomerAddress = async (address: Omit<CustomerAddress, 'id'> &
         // Auto-fill coordinates if missing using Mapbox Forward Geocoding
         if ((!address.lat || !address.long) && address.address) {
             try {
-                const { forwardGeocode } = await import("./mapbox");
+                const { forwardGeocode } = await import("./trackasia");
                 const coords = await forwardGeocode(address.address);
                 if (coords) {
                     console.log(`📍 [customer.ts] Resolved coordinates for "${address.address}":`, coords);
