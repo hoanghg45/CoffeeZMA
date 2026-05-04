@@ -345,9 +345,10 @@ export const AddressPicker: FC<AddressPickerProps> = ({ hideIcon = false, hideCh
                       </Box>
                       <Input
                         value={form.address || ""}
-                        onChange={(e) => setForm({ ...form, address: e.target.value, lat: 0, long: 0 })}
-                        placeholder="Nhập địa chỉ chi tiết"
-                        className="border-none px-0 bg-transparent text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none p-0 h-auto"
+                        readOnly
+                        placeholder="Vui lòng chọn từ Bản đồ hoặc Định vị"
+                        className="border-none px-0 bg-transparent text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none p-0 h-auto cursor-pointer"
+                        onClick={() => setMapPickerVisible(true)}
                       />
                     </Box>
                   </Box>

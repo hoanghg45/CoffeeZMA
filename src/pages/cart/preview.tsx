@@ -15,7 +15,7 @@ import {
   cartState
 } from "state";
 import pay from "utils/product";
-import { Box, Button, Text, useSnackbar, useNavigate } from "zmp-ui";
+import { Box, Button, Text, useSnackbar, useNavigate, Modal } from "zmp-ui";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { LoyaltyOptinSheet } from "components/loyalty/loyalty-optin-sheet";
 import { validateCheckoutFields, getFirstValidationError } from "utils/checkout-validation";
@@ -37,6 +37,7 @@ export const CartPreview: FC = () => {
   const [loyaltyDismissed] = useRecoilState(loyaltyPromptState);
 
   const [loyaltySheetVisible, setLoyaltySheetVisible] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   // Track created Order ID to prevent duplicates if user changes payment method
   const [createdOrderId, setCreatedOrderId] = useState<string | undefined>(undefined);
   const { openSnackbar } = useSnackbar();
@@ -136,8 +137,8 @@ export const CartPreview: FC = () => {
       return;
     }
 
-    // Proceed to payment
-    processPayment();
+    // Proceed to payment confirmation
+    setConfirmModalVisible(true);
   };
 
   const processPayment = async () => {
@@ -180,7 +181,7 @@ export const CartPreview: FC = () => {
 
   const handleLoyaltyContinue = () => {
     setLoyaltySheetVisible(false);
-    processPayment();
+    setConfirmModalVisible(true);
   };
 
   const [expanded, setExpanded] = useState(false);
@@ -265,6 +266,30 @@ export const CartPreview: FC = () => {
         onClose={() => setLoyaltySheetVisible(false)}
         onContinue={handleLoyaltyContinue}
         customerId={customerProfile?.id ?? ""}
+      />
+
+      <Modal
+        visible={confirmModalVisible}
+        title="Xác nhận đơn hàng"
+        onClose={() => setConfirmModalVisible(false)}
+        description="Khách iu ơi, vui lòng kiểm tra lại thông tin đơn hàng trước khi thanh toán nhé!. Lưu ý: Nếu địa chỉ chưa được chọn chính xác, hãy bổ sung ở phần ghi chú để có thể nhận hàng nhanh chóng và dễ dàng hơn nhé! Muối xin chân thành cảm ơn!"
+        actions={[
+          {
+            text: 'Kiểm tra lại',
+            close: true,
+            highLight: false,
+            onClick: () => setConfirmModalVisible(false),
+          },
+          {
+            text: 'Thanh toán',
+            close: true,
+            highLight: true,
+            onClick: () => {
+              setConfirmModalVisible(false);
+              processPayment();
+            },
+          },
+        ]}
       />
     </Box>
   );
