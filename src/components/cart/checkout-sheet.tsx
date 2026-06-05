@@ -13,7 +13,8 @@ import {
     useCurrentLocationState,
     locationState,
     userState,
-    phoneState
+    phoneState,
+    shippingServiceState
 } from "state";
 import { CheckoutItem } from "./checkout-item";
 import { VoucherSection } from "./voucher-section";
@@ -34,6 +35,7 @@ const CheckoutContent: FC<{ onClose: () => void }> = ({ onClose }) => {
     const useCurrentLocation = useRecoilValue(useCurrentLocationState);
     const user = useRecoilValue(userState);
     const phone = useRecoilValue(phoneState);
+    const shippingService = useRecoilValue(shippingServiceState);
 
     const [editingItem, setEditingItem] = useState<CartItem | undefined>();
 
@@ -69,7 +71,8 @@ const CheckoutContent: FC<{ onClose: () => void }> = ({ onClose }) => {
             note: orderNote,
             branchId: store?.id,
             deliveryLat: destLat,
-            deliveryLng: destLng
+            deliveryLng: destLng,
+            shippingServiceId: shippingService
         };
 
         pay(priceBreakdown.finalPrice, cart, context);

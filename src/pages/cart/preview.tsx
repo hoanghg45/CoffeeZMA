@@ -12,7 +12,8 @@ import {
   selectedStoreState,
   phoneState,
   selectedDeliveryTimeState,
-  cartState
+  cartState,
+  shippingServiceState
 } from "state";
 import pay from "utils/product";
 import { Box, Button, Text, useSnackbar, useNavigate, Modal } from "zmp-ui";
@@ -33,6 +34,7 @@ export const CartPreview: FC = () => {
   const selectedStoreLoadable = useRecoilValueLoadable(selectedStoreState);
   const phoneLoadable = useRecoilValueLoadable(phoneState);
   const deliveryTime = useRecoilValue(selectedDeliveryTimeState);
+  const shippingService = useRecoilValue(shippingServiceState);
 
   const [loyaltyDismissed] = useRecoilState(loyaltyPromptState);
 
@@ -159,7 +161,8 @@ export const CartPreview: FC = () => {
         branchId: selectedStore ? String(selectedStore.id) : undefined,
         note: "", // We will add Note input later if needed
         deliveryLat: typeof selectedAddress === 'object' ? selectedAddress?.lat : undefined,
-        deliveryLng: typeof selectedAddress === 'object' ? selectedAddress?.long : undefined
+        deliveryLng: typeof selectedAddress === 'object' ? selectedAddress?.long : undefined,
+        shippingServiceId: shippingService
       }, createdOrderId);
       console.log("Payment flow finished. Result:", result);
 

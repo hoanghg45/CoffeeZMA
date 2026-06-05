@@ -28,6 +28,7 @@ interface OrderData {
     };
     note?: string;
     branchId?: string;
+    shippingServiceId?: "SGN-BIKE" | "SGN-ECO";
 }
 
 // --- Order Fetching Functions (History) ---
@@ -40,7 +41,8 @@ export async function getOrders(userId?: string): Promise<Order[]> {
       SELECT 
         id, created_at, status, total, payment_method, 
         customer_address as "deliveryAddress", 
-        customer_name, customer_phone
+        customer_name, customer_phone,
+        shipping_service_id as "shippingServiceId"
       FROM orders 
       WHERE customer_id = $1 
       ORDER BY created_at DESC
@@ -80,7 +82,8 @@ export async function getOrderDetail(orderId: string): Promise<Order | null> {
       SELECT 
         id, created_at, status, total, payment_method, 
         customer_address as "deliveryAddress",
-        customer_name, customer_phone
+        customer_name, customer_phone,
+        shipping_service_id as "shippingServiceId"
         -- Add tracking info if available in DB schema (drivers table?)
       FROM orders 
       WHERE id = $1
@@ -180,6 +183,7 @@ export const createOrderAPI = async (data: OrderData) => {
         shipFee: data.fees.shipping,
         discount: data.fees.discount || 0,
         total: data.fees.total,
+        shipping_service_id: data.shippingServiceId,
     };
 
     console.log("Calling Backend API:", `${url}/api/orders`, payload);
@@ -220,7 +224,8 @@ function mapRowToOrder(row: any, items: OrderItem[]): Order {
         items: items,
         trackingCode: undefined,
         driverName: undefined,
-        driverPhone: undefined
+        driverPhone: undefined,
+        shippingServiceId: row.shippingServiceId || undefined
     };
 }
 

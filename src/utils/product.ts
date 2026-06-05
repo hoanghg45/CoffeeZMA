@@ -107,6 +107,7 @@ interface OrderContext {
   branchId?: string;
   deliveryLat?: number;
   deliveryLng?: number;
+  shippingServiceId?: "SGN-BIKE" | "SGN-ECO";
 }
 
 const pay = async (amount: number, cart: Cart, context: OrderContext, existingOrderId?: string) => {
@@ -138,7 +139,8 @@ const pay = async (amount: number, cart: Cart, context: OrderContext, existingOr
           note: context.note,
           branchId: context.branchId,
           deliveryLat: context.deliveryLat,
-          deliveryLng: context.deliveryLng
+          deliveryLng: context.deliveryLng,
+          shippingServiceId: context.shippingServiceId
         });
         console.log("Backend Order Created:", backendOrder);
         if (backendOrder && backendOrder.orderId) {

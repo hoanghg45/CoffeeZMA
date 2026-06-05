@@ -22,3 +22,7 @@ CREATE TABLE IF NOT EXISTS loyalty_transactions (
 
 -- Index for querying transactions by customer
 CREATE INDEX IF NOT EXISTS loyalty_transactions_customer_id_idx ON loyalty_transactions (customer_id);
+
+-- 3. Add shipping_service_id to orders table
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_service_id VARCHAR(50);
+

@@ -30,4 +30,5 @@ export interface Order {
     trackingCode?: string;
     driverName?: string;
     driverPhone?: string;
+    shippingServiceId?: "SGN-BIKE" | "SGN-ECO";
 }
