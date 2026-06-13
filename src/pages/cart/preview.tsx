@@ -13,7 +13,8 @@ import {
   phoneState,
   selectedDeliveryTimeState,
   cartState,
-  shippingServiceState
+  shippingServiceState,
+  orderNoteState
 } from "state";
 import pay from "utils/product";
 import { Box, Button, Text, useSnackbar, useNavigate } from "zmp-ui";
@@ -23,6 +24,7 @@ import { validateCheckoutFields, getFirstValidationError } from "utils/checkout-
 
 export const CartPreview: FC = () => {
   const quantity = useRecoilValue(totalQuantityState);
+  const orderNote = useRecoilValue(orderNoteState);
   const [cart, setCart] = useRecoilState(cartState);
   const totalPriceLoadable = useRecoilValueLoadable(totalPriceState);
   const deliveryFeeLoadable = useRecoilValueLoadable(calculatedDeliveryFeeState);
@@ -158,7 +160,7 @@ export const CartPreview: FC = () => {
           total: totalPrice
         },
         branchId: selectedStore ? String(selectedStore.id) : undefined,
-        note: "", // We will add Note input later if needed
+        note: orderNote,
         deliveryLat: typeof selectedAddress === 'object' ? selectedAddress?.lat : undefined,
         deliveryLng: typeof selectedAddress === 'object' ? selectedAddress?.long : undefined,
         shippingServiceId: shippingService
