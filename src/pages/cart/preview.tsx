@@ -57,7 +57,7 @@ export const CartPreview: FC = () => {
 
   const totalPrice = totalPriceLoadable.state === "hasValue" ? totalPriceLoadable.contents : 0;
   const deliveryFee = deliveryFeeLoadable.state === "hasValue" ? deliveryFeeLoadable.contents : 0;
-  const breakdown = breakdownLoadable.state === "hasValue" ? breakdownLoadable.contents : { subtotal: 0, discount: 0 };
+  const breakdown = breakdownLoadable.state === "hasValue" ? breakdownLoadable.contents : { subtotal: 0, discount: 0, voucher: null };
   const customerProfile = customerProfileLoadable.state === "hasValue" ? customerProfileLoadable.contents : null;
   const selectedStore = selectedStoreLoadable.state === "hasValue" ? selectedStoreLoadable.contents : null;
   const phone = phoneLoadable.state === "hasValue" ? phoneLoadable.contents : false;
@@ -159,6 +159,10 @@ export const CartPreview: FC = () => {
           discount: breakdown.discount,
           total: totalPrice
         },
+        voucher: breakdown.voucher ? {
+          id: breakdown.voucher.id,
+          code: breakdown.voucher.code,
+        } : undefined,
         branchId: selectedStore ? String(selectedStore.id) : undefined,
         note: orderNote,
         deliveryLat: typeof selectedAddress === 'object' ? selectedAddress?.lat : undefined,

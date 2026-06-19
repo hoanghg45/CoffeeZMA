@@ -26,6 +26,10 @@ interface OrderData {
         discount?: number;
         total: number;
     };
+    voucher?: {
+        id: string;
+        code: string;
+    };
     note?: string;
     branchId?: string;
     shippingServiceId?: "SGN-BIKE" | "SGN-ECO";
@@ -183,6 +187,8 @@ export const createOrderAPI = async (data: OrderData) => {
         shipFee: data.fees.shipping,
         discount: data.fees.discount || 0,
         total: data.fees.total,
+        voucherId: data.voucher?.id,
+        voucherCode: data.voucher?.code,
         shipping_service_id: data.shippingServiceId,
     };
 

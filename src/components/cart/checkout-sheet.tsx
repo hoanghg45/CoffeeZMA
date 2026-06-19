@@ -68,6 +68,10 @@ const CheckoutContent: FC<{ onClose: () => void }> = ({ onClose }) => {
                 discount: priceBreakdown.discount,
                 total: priceBreakdown.finalPrice
             },
+            voucher: priceBreakdown.voucher ? {
+                id: priceBreakdown.voucher.id,
+                code: priceBreakdown.voucher.code,
+            } : undefined,
             note: orderNote,
             branchId: store?.id,
             deliveryLat: destLat,

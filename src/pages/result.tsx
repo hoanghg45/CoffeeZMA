@@ -9,7 +9,7 @@ import {
 } from "zmp-sdk";
 import { useLocation } from "react-router";
 import { useResetRecoilState } from "recoil";
-import { cartState } from "state";
+import { appliedVoucherState, cartState } from "state";
 import {
   IconPaymentFail,
   IconPaymentLoading,
@@ -129,13 +129,15 @@ const CheckoutResultPage: FC = () => {
   }, []);
 
   const clearCart = useResetRecoilState(cartState);
+  const clearAppliedVoucher = useResetRecoilState(appliedVoucherState);
   useEffect(() => {
     // Only clear cart if payment is strictly SUCCESS (1).
     // Do not clear on Pending (0) or Fail (-1) to allow retry.
     if (paymentResult?.resultCode === 1) {
       clearCart();
+      clearAppliedVoucher();
     }
-  }, [paymentResult]);
+  }, [paymentResult, clearAppliedVoucher, clearCart]);
 
   return (
     <Page className="flex flex-col bg-white">

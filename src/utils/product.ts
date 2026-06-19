@@ -103,6 +103,10 @@ interface OrderContext {
     discount?: number;
     total: number;
   };
+  voucher?: {
+    id: string;
+    code: string;
+  };
   note?: string;
   branchId?: string;
   deliveryLat?: number;
@@ -136,6 +140,7 @@ const pay = async (amount: number, cart: Cart, context: OrderContext, existingOr
           cart: cart,
           paymentMethod: typeof (method as any) === 'object' ? (method as any).id : method,
           fees: context.fees,
+          voucher: context.voucher,
           note: context.note,
           branchId: context.branchId,
           deliveryLat: context.deliveryLat,
@@ -148,8 +153,7 @@ const pay = async (amount: number, cart: Cart, context: OrderContext, existingOr
         }
       } catch (apiErr) {
         console.error("Backend Order Creation Failed", apiErr);
-        // Verify with user: Should we block if backend fails?
-        // throw apiErr; 
+        throw apiErr;
       }
     } else {
       console.log("Reusing existing Backend Order ID:", backendOrderId);

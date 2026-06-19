@@ -60,7 +60,7 @@ export async function getVoucherByCode(code: string): Promise<Voucher | null> {
         return mapRowToVoucher(rows[0]);
     } catch (error) {
         console.error("Error fetching voucher:", error);
-        return null;
+        throw error;
     }
 }
 
@@ -95,7 +95,7 @@ export async function getActiveVouchers(): Promise<Voucher[]> {
         return rows.map(mapRowToVoucher);
     } catch (error) {
         console.error("Error fetching active vouchers:", error);
-        return [];
+        throw error;
     }
 }
 

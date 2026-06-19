@@ -1,9 +1,9 @@
 import React, { FC, useState, useEffect } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useRecoilValueLoadable } from "recoil";
 import { Box, Button, Input, Text } from "zmp-ui";
 import { TicketPercent, Tag, ChevronRight, XCircle, CheckCircle2, Loader2, Lock } from "lucide-react";
 import { Sheet } from "./fullscreen-sheet";
-import { appliedVoucherState, voucherPickerVisibleState, cartState, subtotalState } from "../state";
+import { appliedVoucherState, voucherPickerVisibleState, cartState, subtotalState, voucherState } from "../state";
 import { getVouchersWithEligibility } from "../services/voucher";
 import { VoucherWithEligibility } from "../types/voucher";
 import { calcFinalPrice } from "../utils/product";
@@ -16,20 +16,62 @@ export const VoucherPicker: FC = () => {
     const [inputCode, setInputCode] = useState("");
     const [vouchers, setVouchers] = useState<VoucherWithEligibility[]>([]);
     const [loading, setLoading] = useState(false);
+    const appliedVoucherLoadable = useRecoilValueLoadable(voucherState);
+
+    // Keep the displayed code aligned with the authoritative voucher record.
+    // Cart-based eligibility errors do not remove a still-active voucher.
+    useEffect(() => {
+        if (!appliedVoucher || appliedVoucherLoadable.state !== "hasValue") {
+            return;
+        }
+
+        const { voucher, error } = appliedVoucherLoadable.contents;
+        const isMissing = !voucher && Boolean(error);
+        const isConsumedOrInactive = Boolean(voucher && (
+            voucher.status !== "ACTIVE" ||
+            (voucher.usageLimit !== null && voucher.usageCount >= voucher.usageLimit) ||
+            voucher.endDate.getTime() <= Date.now()
+        ));
+
+        if (isMissing || isConsumedOrInactive) {
+            setAppliedVoucher(null);
+            setInputCode("");
+        }
+    }, [appliedVoucher, appliedVoucherLoadable, setAppliedVoucher]);
 
     // Pre-calculate eligibility when sheet opens or cart changes
     useEffect(() => {
-        if (visible && cart.length > 0) {
-            setLoading(true);
-            getVouchersWithEligibility(
-                cart,
-                subtotal,
-                (item) => calcFinalPrice(item.product, item.options)
-            )
-                .then(setVouchers)
-                .finally(() => setLoading(false));
+        if (!visible || cart.length === 0) {
+            return;
         }
-    }, [visible, cart, subtotal]);
+
+        let cancelled = false;
+        setLoading(true);
+        getVouchersWithEligibility(
+            cart,
+            subtotal,
+            (item) => calcFinalPrice(item.product, item.options)
+        )
+            .then((nextVouchers) => {
+                if (cancelled) return;
+
+                setVouchers(nextVouchers);
+                if (appliedVoucher && !nextVouchers.some((voucher) => voucher.code === appliedVoucher)) {
+                    setAppliedVoucher(null);
+                    setInputCode("");
+                }
+            })
+            .catch((error) => {
+                console.error("Failed to refresh vouchers:", error);
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [visible, cart, subtotal, appliedVoucher, setAppliedVoucher]);
 
     const handleApply = () => {
         if (inputCode.trim()) {
