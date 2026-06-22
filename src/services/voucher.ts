@@ -7,6 +7,11 @@ import { pool } from "./db";
 import { Voucher, VoucherValidationResult, VoucherWithEligibility } from "../types/voucher";
 import { Cart, CartItem } from "../types/cart";
 
+export interface VoucherQueryContext {
+    customerId?: string;
+    branchId?: string;
+}
+
 /**
  * Map DB row to Voucher type (snake_case → camelCase)
  */
@@ -31,9 +36,18 @@ function mapRowToVoucher(row: any): Voucher {
 }
 
 /**
- * Fetch voucher by code with scoped products/categories
+ * Fetch vouchers visible to one customer.
+ *
+ * Visibility rules:
+ * - broadcast vouchers have no customer owner and no visit trigger;
+ * - personal copies must belong to the current customer;
+ * - visit templates are offered only when the customer's next order reaches
+ *   the milestone and that rule has never been issued to them.
  */
-export async function getVoucherByCode(code: string): Promise<Voucher | null> {
+async function getVisibleVouchers(
+    context: VoucherQueryContext,
+    code?: string
+): Promise<Voucher[]> {
     try {
         const query = `
       SELECT 
@@ -49,54 +63,81 @@ export async function getVoucherByCode(code: string): Promise<Voucher | null> {
       FROM vouchers v
       LEFT JOIN voucher_products vp ON v.id = vp.voucher_id
       LEFT JOIN voucher_categories vc ON v.id = vc.voucher_id
-      WHERE UPPER(v.code) = UPPER($1)
+      LEFT JOIN branch_vouchers bv
+        ON v.id = bv.voucher_id
+       AND bv.branch_id = $3
+      WHERE ($2::text IS NULL OR UPPER(v.code) = UPPER($2))
+        AND v.status = 'ACTIVE'
+        AND v.start_date <= NOW()
+        AND v.end_date >= NOW()
+        AND (v.usage_limit IS NULL OR v.usage_count < v.usage_limit)
+        AND ($3::text IS NULL OR COALESCE(bv.is_active, true) = true)
+        AND (
+          (
+            v.trigger_type IS NULL
+            AND NOT EXISTS (
+              SELECT 1
+              FROM customer_vouchers owned
+              WHERE owned.voucher_id = v.id
+            )
+          )
+          OR EXISTS (
+            SELECT 1
+            FROM customer_vouchers owned
+            WHERE owned.voucher_id = v.id
+              AND owned.customer_id = $1
+          )
+          OR (
+            v.trigger_type = 'VISIT_COUNT'
+            AND $1::text IS NOT NULL
+            AND EXISTS (
+              SELECT 1
+              FROM customers customer
+              WHERE customer.id = $1
+                AND customer.total_orders + 1 >= v.trigger_value
+            )
+            AND NOT EXISTS (
+              SELECT 1
+              FROM customer_vouchers issued
+              WHERE issued.customer_id = $1
+                AND issued.voucher_rule_id = v.id
+            )
+          )
+        )
       GROUP BY v.id
+      ORDER BY v.discount_value DESC
     `;
 
-        const { rows } = await pool.query(query, [code]);
-
-        if (rows.length === 0) return null;
-
-        return mapRowToVoucher(rows[0]);
+        const { rows } = await pool.query(query, [
+            context.customerId || null,
+            code || null,
+            context.branchId || null,
+        ]);
+        return rows.map(mapRowToVoucher);
     } catch (error) {
-        console.error("Error fetching voucher:", error);
+        console.error("Error fetching visible vouchers:", error);
         throw error;
     }
 }
 
 /**
- * Fetch all active vouchers for voucher picker
+ * Fetch one customer-visible voucher by code.
  */
-export async function getActiveVouchers(): Promise<Voucher[]> {
-    try {
-        const query = `
-      SELECT 
-        v.*,
-        COALESCE(
-          array_agg(DISTINCT vp.product_id) FILTER (WHERE vp.product_id IS NOT NULL),
-          '{}'
-        ) as product_ids,
-        COALESCE(
-          array_agg(DISTINCT vc.category_id) FILTER (WHERE vc.category_id IS NOT NULL),
-          '{}'
-        ) as category_ids
-      FROM vouchers v
-      LEFT JOIN voucher_products vp ON v.id = vp.voucher_id
-      LEFT JOIN voucher_categories vc ON v.id = vc.voucher_id
-      WHERE v.status = 'ACTIVE'
-        AND v.start_date <= NOW()
-        AND v.end_date >= NOW()
-        AND (v.usage_limit IS NULL OR v.usage_count < v.usage_limit)
-      GROUP BY v.id
-      ORDER BY v.discount_value DESC
-    `;
+export async function getVoucherByCode(
+    code: string,
+    context: VoucherQueryContext = {}
+): Promise<Voucher | null> {
+    const vouchers = await getVisibleVouchers(context, code);
+    return vouchers[0] || null;
+}
 
-        const { rows } = await pool.query(query);
-        return rows.map(mapRowToVoucher);
-    } catch (error) {
-        console.error("Error fetching active vouchers:", error);
-        throw error;
-    }
+/**
+ * Fetch all active vouchers visible to the current customer.
+ */
+export async function getActiveVouchers(
+    context: VoucherQueryContext = {}
+): Promise<Voucher[]> {
+    return getVisibleVouchers(context);
 }
 
 /**
@@ -209,9 +250,10 @@ export function calculateEligibleSubtotal(
 export async function getVouchersWithEligibility(
     cart: Cart,
     subtotal: number,
-    calcItemPrice: (item: CartItem) => number
+    calcItemPrice: (item: CartItem) => number,
+    context: VoucherQueryContext = {}
 ): Promise<VoucherWithEligibility[]> {
-    const vouchers = await getActiveVouchers();
+    const vouchers = await getActiveVouchers(context);
 
     return vouchers
         .map(voucher => {

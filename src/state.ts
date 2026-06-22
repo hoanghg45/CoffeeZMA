@@ -434,14 +434,19 @@ export const voucherState = selector<{ voucher: Voucher | null; error: string | 
   key: "voucher",
   get: async ({ get }) => {
     const code = get(appliedVoucherState);
-    const cart = get(cartState);
-    const subtotal = get(subtotalState);
 
     if (!code) {
       return { voucher: null, error: null };
     }
 
-    const voucher = await getVoucherByCode(code);
+    const cart = get(cartState);
+    const subtotal = get(subtotalState);
+    const customerProfile = get(customerProfileState);
+    const selectedStore = get(selectedStoreState);
+    const voucher = await getVoucherByCode(code, {
+      customerId: customerProfile?.id,
+      branchId: selectedStore ? String(selectedStore.id) : undefined,
+    });
     if (!voucher) {
       return { voucher: null, error: `Mã "${code}" không tồn tại` };
     }

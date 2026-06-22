@@ -3,7 +3,15 @@ import { useRecoilState, useRecoilValue, useRecoilValueLoadable } from "recoil";
 import { Box, Button, Input, Text } from "zmp-ui";
 import { TicketPercent, Tag, ChevronRight, XCircle, CheckCircle2, Loader2, Lock } from "lucide-react";
 import { Sheet } from "./fullscreen-sheet";
-import { appliedVoucherState, voucherPickerVisibleState, cartState, subtotalState, voucherState } from "../state";
+import {
+    appliedVoucherState,
+    voucherPickerVisibleState,
+    cartState,
+    subtotalState,
+    voucherState,
+    customerProfileState,
+    selectedStoreState,
+} from "../state";
 import { getVouchersWithEligibility } from "../services/voucher";
 import { VoucherWithEligibility } from "../types/voucher";
 import { calcFinalPrice } from "../utils/product";
@@ -17,6 +25,16 @@ export const VoucherPicker: FC = () => {
     const [vouchers, setVouchers] = useState<VoucherWithEligibility[]>([]);
     const [loading, setLoading] = useState(false);
     const appliedVoucherLoadable = useRecoilValueLoadable(voucherState);
+    const customerProfileLoadable = useRecoilValueLoadable(customerProfileState);
+    const selectedStoreLoadable = useRecoilValueLoadable(selectedStoreState);
+    const customerId = customerProfileLoadable.state === "hasValue"
+        ? customerProfileLoadable.contents?.id
+        : undefined;
+    const branchId = selectedStoreLoadable.state === "hasValue" && selectedStoreLoadable.contents
+        ? String(selectedStoreLoadable.contents.id)
+        : undefined;
+    const voucherContextLoading = customerProfileLoadable.state === "loading"
+        || selectedStoreLoadable.state === "loading";
 
     // Keep the displayed code aligned with the authoritative voucher record.
     // Cart-based eligibility errors do not remove a still-active voucher.
@@ -41,7 +59,7 @@ export const VoucherPicker: FC = () => {
 
     // Pre-calculate eligibility when sheet opens or cart changes
     useEffect(() => {
-        if (!visible || cart.length === 0) {
+        if (!visible || cart.length === 0 || voucherContextLoading) {
             return;
         }
 
@@ -50,7 +68,8 @@ export const VoucherPicker: FC = () => {
         getVouchersWithEligibility(
             cart,
             subtotal,
-            (item) => calcFinalPrice(item.product, item.options)
+            (item) => calcFinalPrice(item.product, item.options),
+            { customerId, branchId }
         )
             .then((nextVouchers) => {
                 if (cancelled) return;
@@ -71,7 +90,16 @@ export const VoucherPicker: FC = () => {
         return () => {
             cancelled = true;
         };
-    }, [visible, cart, subtotal, appliedVoucher, setAppliedVoucher]);
+    }, [
+        visible,
+        cart,
+        subtotal,
+        appliedVoucher,
+        setAppliedVoucher,
+        customerId,
+        branchId,
+        voucherContextLoading,
+    ]);
 
     const handleApply = () => {
         if (inputCode.trim()) {
