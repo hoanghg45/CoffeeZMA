@@ -20,7 +20,7 @@ import { estimateFee } from "services/ahamove";
 
 import { getBranches } from "services/branch";
 import { getVoucherByCode, validateVoucher } from "services/voucher";
-import { getCustomerByZaloId, createCustomer, CustomerProfile, getCustomerAddresses, CustomerAddress } from "services/customer";
+import { getCustomerByZaloId, createCustomer, updateCustomerPhone, CustomerProfile, getCustomerAddresses, CustomerAddress } from "services/customer";
 import { calculateEarnedPoints, calculateRedeemValue, canRedeem } from "utils/loyalty";
 import appConfig from "../app-config.json";
 
@@ -398,6 +398,11 @@ export const phoneState = selector<string | boolean>({
         const phoneNumber = await getCurrentPhoneNumber();
 
         if (phoneNumber) {
+          // Update the customer's phone number in the database asynchronously
+          const user = get(userState);
+          if (user && user.id) {
+            updateCustomerPhone(user.id, phoneNumber).catch(console.error);
+          }
           return phoneNumber;
         }
 

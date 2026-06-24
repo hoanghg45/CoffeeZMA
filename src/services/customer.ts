@@ -111,6 +111,39 @@ export const createCustomer = async (
 };
 
 /**
+ * Update customer's phone number.
+ * Usually called when the user grants phone number permission.
+ */
+export const updateCustomerPhone = async (
+    zaloId: string,
+    phoneNumber: string
+): Promise<boolean> => {
+    if (!zaloId || !phoneNumber) {
+        console.warn("[customer.ts] updateCustomerPhone called with empty zaloId or phoneNumber");
+        return false;
+    }
+
+    try {
+        const res = await pool.query(
+            `UPDATE customers 
+             SET phone_number = $2, 
+                 updated_at = NOW()
+             WHERE id = $1`,
+            [zaloId, phoneNumber]
+        );
+
+        if (res.rowCount && res.rowCount > 0) {
+            console.log("[customer.ts] Customer phone updated successfully for:", zaloId);
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error("[customer.ts] Error updating customer phone:", error);
+        return false;
+    }
+};
+
+/**
  * Mark a customer as a loyalty program member.
  */
 export const markCustomerAsLoyaltyMember = async (
