@@ -5,6 +5,11 @@
   "description": "ZaUI Coffee",
   "repository": "",
   "license": "UNLICENSED",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "api"
+  ],
   "browserslist": [
     "Android >= 5",
     "IOS >= 9.3",
@@ -19,7 +24,13 @@
     "deploy": "zmp deploy",
     "build": "zmp build",
     "build:css": "postcss src/css/tailwind.css -o src/css/styles.css",
-    "test": "vitest"
+    "test": "vitest run",
+    "test:core": "npm run test -w @muoi/core",
+    "test:web": "npm run test -w @muoi/web",
+    "test:api": "npm run test -w @muoi/api",
+    "dev:web": "npm run dev -w @muoi/web",
+    "dev:api": "npm run dev -w @muoi/api",
+    "build:web": "npm run build -w @muoi/web"
   },
   "dependencies": {
     "@react-spring/web": "^9.6.1",

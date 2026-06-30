@@ -1,0 +1,24 @@
+{
+  "name": "@muoi/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend REST API for Muối Coffee (orders, SePay, catalog)",
+  "scripts": {
+    "predev": "npm run build -w @muoi/core",
+    "dev": "vercel dev --listen 3001",
+    "predeploy": "npm run build -w @muoi/core",
+    "pretest": "npm run build -w @muoi/core",
+    "deploy": "vercel --prod",
+    "test": "node --test lib/__tests__/*.test.js"
+  },
+  "dependencies": {
+    "@muoi/core": "*",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "vercel": "^39.0.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}

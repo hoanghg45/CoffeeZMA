@@ -1,0 +1,77 @@
+import type { Option, Product } from "../types/product";
+import type { SelectedOptions } from "../types/cart";
+
+export function calcFinalPrice(
+  product: Product,
+  options?: SelectedOptions,
+): number {
+  let finalPrice = product.price;
+  if (product.sale) {
+    if (product.sale.type === "fixed") {
+      finalPrice = product.price - product.sale.amount;
+    } else {
+      finalPrice = product.price * (1 - product.sale.percent);
+    }
+  }
+
+  if (options && product.variants) {
+    const selectedOptions: Option[] = [];
+    for (const variantKey in options) {
+      const variant = product.variants.find((v) => v.id === variantKey);
+      if (variant) {
+        const currentOption = options[variantKey];
+        if (typeof currentOption === "string") {
+          const selected = variant.options.find((o) => o.id === currentOption);
+          if (selected) {
+            selectedOptions.push(selected);
+          }
+        } else {
+          const selecteds = variant.options.filter((o) =>
+            currentOption.includes(o.id),
+          );
+          selectedOptions.push(...selecteds);
+        }
+      }
+    }
+    finalPrice = selectedOptions.reduce((price, option) => {
+      if (option.priceChange) {
+        if (option.priceChange.type == "fixed") {
+          return price + option.priceChange.amount;
+        } else {
+          return price + product.price * option.priceChange.percent;
+        }
+      }
+      return price;
+    }, finalPrice);
+  }
+  return finalPrice;
+}
+
+export function isIdentical(
+  option1: SelectedOptions,
+  option2: SelectedOptions,
+): boolean {
+  const option1Keys = Object.keys(option1);
+  const option2Keys = Object.keys(option2);
+
+  if (option1Keys.length !== option2Keys.length) {
+    return false;
+  }
+
+  for (const key of option1Keys) {
+    const option1Value = option1[key];
+    const option2Value = option2[key];
+
+    const areEqual =
+      Array.isArray(option1Value) &&
+      Array.isArray(option2Value) &&
+      [...option1Value].sort().toString() ===
+        [...option2Value].sort().toString();
+
+    if (option1Value !== option2Value && !areEqual) {
+      return false;
+    }
+  }
+
+  return true;
+}
