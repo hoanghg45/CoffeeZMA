@@ -1,5 +1,5 @@
 # Web Clone Plan
 
-Plan đầy đủ đã chuyển sang:
+Bản plan chính thức (sync từ Cursor plan):
 
 **[docs/planning/web-clone-plan.md](./planning/web-clone-plan.md)**
