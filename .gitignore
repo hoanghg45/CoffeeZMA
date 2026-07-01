@@ -36,4 +36,5 @@ Thumbs.db
 
 # Production build
 www/
+dist/
 .env
